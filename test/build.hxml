@@ -1,0 +1,4 @@
+
+-cp ..
+-neko test_socket.n
+-main TestSSLSocket
