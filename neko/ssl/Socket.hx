@@ -1,21 +1,21 @@
 package neko.ssl;
 
 import neko.net.Host;
-import neko.net.Socket;
 
+enum SocketHandle {}
 enum CTX {}
 enum SSL {}
 
-class SSLSocket {
+class Socket {
 	
 	static function __init__() {
 		neko.Lib.load( "std", "socket_init", 0 )();
 	}
 	
-	static var certFolder = "E:\\openssl-0.9.8c\\certs"; //TODO
+	static var certFolder = "/etc/ssl/certs"; //TODO
 	
-	public var input(default,null) : SSLSocketInput;
-	public var output(default,null) : SSLSocketOutput;
+	public var input(default,null) : SocketInput;
+	public var output(default,null) : SocketOutput;
 	
 	var __s : SocketHandle;
 	var ctx : CTX;
@@ -24,8 +24,8 @@ class SSLSocket {
 	public function new( ?s ) {
 		initializeOpenSSL();
 		__s = if( s == null ) socket_new(false) else s;
-		input = new SSLSocketInput(__s);
-		output = new SSLSocketOutput(__s);
+		input = new SocketInput(__s);
+		output = new SocketOutput(__s);
 	}
 	
 	public function connect( host : Host, port : Int ) {
@@ -76,8 +76,8 @@ class SSLSocket {
 		socket_bind( __s, host, port );
 	}
 	
-	public function accept() : SSLSocket {
-		return new SSLSocket( socket_accept( __s ) );
+	public function accept() : Socket {
+		return new Socket( socket_accept( __s ) );
 	}
 	
 	public function peer() : { host : Host, port : Int } {
@@ -109,10 +109,10 @@ class SSLSocket {
 		var rsclvl : Int = SSL_CTX_load_verify_locations( ctx, neko.Lib.haxeToNeko( certFolder ) );
 	}
 	
-	public static function select( read : Array<SSLSocket>, write : Array<SSLSocket>, others : Array<SSLSocket>, timeout : Float )
-	: {read: Array<SSLSocket>, write: Array<SSLSocket>, others: Array<SSLSocket> } {
+	public static function select( read : Array<Socket>, write : Array<Socket>, others : Array<Socket>, timeout : Float )
+	: {read: Array<Socket>, write: Array<Socket>, others: Array<Socket> } {
 		var c = untyped __dollar__hnew( 1 );
-		var f = function( a : Array<SSLSocket> ){
+		var f = function( a : Array<Socket> ){
 			if( a == null ) return null;
 			untyped {
 				var r = __dollar__amake( a.length );
@@ -126,13 +126,13 @@ class SSLSocket {
 			}
 		}
 		var neko_array = socket_select( f(read), f(write), f(others), timeout);
-		var g = function( a ) : Array<SSLSocket> {
+		var g = function( a ) : Array<Socket> {
 			if( a == null ) return null;
 			var r = new Array();
 			var i = 0;
 			while( i < untyped __dollar__asize(a) ){
 				var t = untyped __dollar__hget(c,a[i],null);
-				if( t == null ) throw "SSLSocket object not found.";
+				if( t == null ) throw "Socket object not found.";
 				r[i] = t;
 				i += 1;
 			}
