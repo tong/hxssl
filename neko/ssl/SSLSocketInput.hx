@@ -1,9 +1,9 @@
-package ssl;
+package neko.ssl;
 
 import haxe.io.Eof;
 import haxe.io.Error;
 import neko.net.Socket;
-import ssl.SSLSocket;
+import neko.ssl.SSLSocket;
 
 class SSLSocketInput extends haxe.io.Input {
 	
@@ -27,6 +27,21 @@ class SSLSocketInput extends haxe.io.Input {
 				throw new Eof();
 				return -1;
 		}
+	}
+	
+	public override function readBytes( buf : haxe.io.Bytes, pos : Int, len : Int ) : Int {
+		var r : Int;
+		try {
+			r = socket_recv(ssl,buf.getData(),pos,len);
+		} catch( e : Dynamic ) {
+			if( e == "Blocking" )
+				throw Blocked;
+			else
+				throw Custom(e);
+		}
+		if( r == 0 )
+			throw new haxe.io.Eof();
+		return r;
 	}
 	
 	public override function close() {

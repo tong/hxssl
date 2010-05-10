@@ -174,10 +174,12 @@ value SSL_send( value ssl, value data, value pos, value len ) {
 }
 value SSL_recv( value ssl, value data, value pos, value len ) {
 	int p,l,dlen;
-	//val_check_kind(o,k_socket);
-	//val_check(data,string);
-	//val_check(pos,int);
-	//val_check(len,int);
+	/*
+val_check_kind(ssl,k_ssl);
+val_check(data,string);
+val_check(pos,int);
+val_check(len,int);
+*/
 	p = val_int(pos);
 	l = val_int(len);
 	dlen = val_strlen(data);
@@ -188,6 +190,7 @@ value SSL_recv( value ssl, value data, value pos, value len ) {
 	//	return block_error();
 	return alloc_int(dlen);
 }
+
 value SSL_recv_char( value ssl ) {
 	unsigned char cc;
 	//val_check_kind(o,k_socket);
@@ -196,6 +199,12 @@ value SSL_recv_char( value ssl ) {
 		//) return block_error();
 	return alloc_int(cc);
 }
+
+/*
+value SSL_recv_bytes( value ssl ) {
+}
+*/
+
 //int SSL_shutdown(SSL *s);
 value _SSL_shutdown(value ssl) {
 	return alloc_int(SSL_shutdown((SSL*)val_data(ssl)));

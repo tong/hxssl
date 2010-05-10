@@ -1,4 +1,5 @@
 
--cp ..
--neko test_socket.n
+-cp ../
+-cp ../../hxmpp
+-neko test.n
 -main TestSSLSocket

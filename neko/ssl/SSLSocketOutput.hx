@@ -1,9 +1,9 @@
-package ssl;
+package neko.ssl;
 
 import haxe.io.Error;
 import haxe.io.Eof;
 import neko.net.Socket;
-import ssl.SSLSocket;
+import neko.ssl.SSLSocket;
 
 class SSLSocketOutput extends haxe.io.Output {
 	

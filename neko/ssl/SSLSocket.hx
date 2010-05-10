@@ -1,4 +1,4 @@
-package ssl;
+package neko.ssl;
 
 import neko.net.Host;
 import neko.net.Socket;
