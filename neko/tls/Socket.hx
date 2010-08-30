@@ -1,31 +1,35 @@
-package neko.ssl;
+package neko.tls;
 
 import neko.net.Host;
 
 enum SocketHandle {}
 enum CTX {}
-enum SSL {}
+enum TLS {}
 
 class Socket {
-	
+
 	static function __init__() {
 		neko.Lib.load( "std", "socket_init", 0 )();
 	}
-	
+
 	static var certFolder = "/etc/ssl/certs"; //TODO
-	
+
 	public var input(default,null) : SocketInput;
 	public var output(default,null) : SocketOutput;
-	
+
 	var __s : SocketHandle;
 	var ctx : CTX;
-	var ssl: SSL;
-	
+	var ssl: TLS;
+
 	public function new( ?s ) {
 		initializeOpenSSL();
 		__s = if( s == null ) socket_new(false) else s;
 		input = new SocketInput(__s);
 		output = new SocketOutput(__s);
+	}
+	
+	public function setSecure() {
+		trace("TODO not implemented");
 	}
 	
 	public function connect( host : Host, port : Int ) {
@@ -44,7 +48,7 @@ class Socket {
 				neko.Lib.rethrow( e );
 		}
 	}
-	
+
 	public function close() {
 		socket_close( __s );
 		untyped {
@@ -54,32 +58,32 @@ class Socket {
 		input.close();
 		output.close();
 	}
-	
+
 	public function read() : String {
-		return socket_read( ssl );		
+		return socket_read( ssl );
 	}
-	
+
 	public function write( content : String ) {
 		socket_write( ssl, neko.Lib.haxeToNeko( content ) );
 	}
-	
+
 	public function listen( connections : Int ) {
 		socket_listen( __s, connections );
 	}
-	
+
 	public function shutdown( read : Bool, write : Bool ) {
 		SSL_shutdown( ssl );
 		socket_shutdown( __s, read, write );
 	}
-	
+
 	public function bind( host : Host, port : Int ) {
 		socket_bind( __s, host, port );
 	}
-	
+
 	public function accept() : Socket {
 		return new Socket( socket_accept( __s ) );
 	}
-	
+
 	public function peer() : { host : Host, port : Int } {
 		var a : Dynamic = socket_peer( __s );
 		return { host : a[0], port : a[1] };
@@ -101,14 +105,14 @@ class Socket {
 	public function setBlocking( b : Bool ) {
 		socket_set_blocking( __s, b );
 	}
-	
+
 	function initializeOpenSSL() {
-		SSL_library_init();	
+		SSL_library_init();
 		SSL_load_error_strings();
 		ctx = SSL_CTX_new( SSLv23_client_method() );
 		var rsclvl : Int = SSL_CTX_load_verify_locations( ctx, neko.Lib.haxeToNeko( certFolder ) );
 	}
-	
+
 	public static function select( read : Array<Socket>, write : Array<Socket>, others : Array<Socket>, timeout : Float )
 	: {read: Array<Socket>, write: Array<Socket>, others: Array<Socket> } {
 		var c = untyped __dollar__hnew( 1 );
@@ -145,7 +149,7 @@ class Socket {
 			others: g(neko_array[2])
 		};
 	}
-	
+
 	public static function resolve( host : String ) : Host {
 		return host_resolve( neko.Lib.haxeToNeko( host ) );
 	}
@@ -161,7 +165,7 @@ class Socket {
 	public static function localhost() : String {
 		return new String( host_local() );
 	}
-	
+
 	static var socket_new = neko.Lib.load( "std", "socket_new", 1 );
 	static var socket_close = neko.Lib.load( "std", "socket_close", 1 );
 	static var socket_write = Loader.load( "__SSL_write", 2 );
@@ -179,9 +183,9 @@ class Socket {
 	static var socket_host = neko.Lib.load( "std", "socket_host", 1 );
 	static var socket_set_timeout = neko.Lib.load( "std", "socket_set_timeout", 2 );
 	static var socket_shutdown = neko.Lib.load( "std", "socket_shutdown", 3 );
-	static var SSL_shutdown = Loader.load( "_SSL_shutdown", 1 );	
+	static var SSL_shutdown = Loader.load( "_SSL_shutdown", 1 );
 	static var socket_set_blocking = neko.Lib.load( "std", "socket_set_blocking", 2 );
-	
+
 	static var SSL_load_error_strings = Loader.load( "_SSL_load_error_strings", 0 );
 	static var SSL_library_init = Loader.load( "_SSL_library_init", 0 );
 	static var SSL_CTX_new = Loader.load( "_SSL_CTX_new", 1 );
@@ -193,10 +197,10 @@ class Socket {
 	static var BIO_NOCLOSE = Loader.load( "_BIO_NOCLOSE", 0 );
 	static var SSL_connect = Loader.load( "_SSL_connect", 1 );
 	static var SSL_set_fd = Loader.load ( "_SSL_set_fd", 2 );
-	static var SSL_CTX_set_verify_depth = Loader.load(  "_SSL_CTX_set_verify_depth", 2 ); 
-			
+	static var SSL_CTX_set_verify_depth = Loader.load(  "_SSL_CTX_set_verify_depth", 2 );
+
 	static var BIO_new = Loader.load( "_BIO_new", 1 );
 	static var BIO_set_fd = Loader.load( "_BIO_set_fd", 3 );
 	static var BIO_s_socket = Loader.load( "_BIO_s_socket", 0 );
-	
+
 }

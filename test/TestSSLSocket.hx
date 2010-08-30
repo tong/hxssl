@@ -9,7 +9,7 @@ class TestSSLSocket {
 		
 		var sock = new neko.ssl.Socket();
 		neko.Lib.println( "Connecting to "+IP );
-		sock.connect( neko.ssl.Socket.resolve( IP ), PORT );
+		sock.connect( neko.ssl.Socket.resolve( IP ), 443 );
 		neko.Lib.println( "Connected." );
 		neko.Lib.println( "Writing data to "+JABBER_HOST+" ..." );
 		sock.write( '<?xml version="1.0" encoding="UTF-8"?><stream:stream xmlns:stream="http://etherx.jabber.org/streams" xmlns="jabber:client" to="'+JABBER_HOST+'" xml:lang="en" version="1.0">');
