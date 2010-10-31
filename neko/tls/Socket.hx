@@ -6,6 +6,7 @@ enum SocketHandle {}
 enum CTX {}
 enum TLS {}
 
+
 class Socket {
 
 	static function __init__() {
@@ -28,9 +29,11 @@ class Socket {
 		output = new SocketOutput(__s);
 	}
 	
+	/*
 	public function setSecure() {
 		trace("TODO not implemented");
 	}
+	*/
 	
 	public function connect( host : Host, port : Int ) {
 		try {
@@ -183,9 +186,9 @@ class Socket {
 	static var socket_host = neko.Lib.load( "std", "socket_host", 1 );
 	static var socket_set_timeout = neko.Lib.load( "std", "socket_set_timeout", 2 );
 	static var socket_shutdown = neko.Lib.load( "std", "socket_shutdown", 3 );
-	static var SSL_shutdown = Loader.load( "_SSL_shutdown", 1 );
 	static var socket_set_blocking = neko.Lib.load( "std", "socket_set_blocking", 2 );
 
+	static var SSL_shutdown = Loader.load( "_SSL_shutdown", 1 );
 	static var SSL_load_error_strings = Loader.load( "_SSL_load_error_strings", 0 );
 	static var SSL_library_init = Loader.load( "_SSL_library_init", 0 );
 	static var SSL_CTX_new = Loader.load( "_SSL_CTX_new", 1 );

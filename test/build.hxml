@@ -1,7 +1,4 @@
 
 -cp ../
-#-cp ../../hxmpp
 -neko test.n
 -main TestSSLSocket
-#-D JABBER_DEBUG
-#-D XMPP_DEBUG

@@ -1,3 +1,4 @@
+
 #include "neko.h"
 #include "openssl/hmac.h"
 #include "openssl/evp.h"
@@ -6,7 +7,9 @@
 //unsigned char *HMAC(const EVP_MD *evp_md, const void *key, int key_len,
 //		    const unsigned char *d, size_t n, unsigned char *md,
 //		    unsigned int *md_len);
+
 DEFINE_KIND(k_unsigned_char);
+
 value _HMAC(const value evp_md, const value key, value key_len,
 		   const value d, value n, value md, value md_len) {
 	return alloc_abstract(k_unsigned_char, 
