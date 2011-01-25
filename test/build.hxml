@@ -2,3 +2,8 @@
 -cp ../
 -neko test.n
 -main TestSSLSocket
+
+--next
+-cp ../
+-neko https_test.n
+-main TestHttps

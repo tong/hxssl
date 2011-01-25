@@ -2,9 +2,11 @@
 #if neko
 import neko.Lib;
 import neko.tls.Socket;
+import neko.net.Host;
 #else
 import cpp.Lib;
 import cpp.tls.Socket;
+import cpp.net.Host;
 #end
 
 class TestSSLSocket {
@@ -17,7 +19,7 @@ class TestSSLSocket {
 		
 		var sock = new Socket();
 		Lib.println( "Connecting to "+IP );
-		sock.connect( Socket.resolve( IP ), 443 );
+		sock.connect( new Host(IP), 443 );
 		Lib.println( "Connected." );
 		Lib.println( "Writing data to "+JABBER_HOST+" ..." );
 		sock.write( '<?xml version="1.0" encoding="UTF-8"?><stream:stream xmlns:stream="http://etherx.jabber.org/streams" xmlns="jabber:client" to="'+JABBER_HOST+'" xml:lang="en" version="1.0">');
