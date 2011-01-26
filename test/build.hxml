@@ -1,4 +1,9 @@
 
 -cp ../
--neko test.n
+-neko test_socket.n
 -main TestSSLSocket
+
+--next
+-cp ../
+-neko test_https.n
+-main TestHttps
