@@ -1,8 +1,10 @@
 
+# SSL socket
 -cp ../
 -neko test_socket.n
 -main TestSSLSocket
 
+# HTTPS
 --next
 -cp ../
 -neko test_https.n

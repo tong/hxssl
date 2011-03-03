@@ -1,9 +1,4 @@
 
-ATTENTION!!! ##########################################################
-It would be awesome if someone could build ndlls for windows and/or mac 
-#######################################################################
-
-
 HXSSL
 =====
 Updated fork of the neko-openssl project.
@@ -11,4 +6,12 @@ Updated fork of the neko-openssl project.
 
 LINKS
 -----
+https://github.com/tong/hxssl
 http://code.google.com/p/neko-openssl/
+
+
+AUTHORS
+-------
+tong
+delahee
+robinp

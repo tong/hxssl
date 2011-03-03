@@ -24,7 +24,7 @@ class TestHttps {
       }
 
       var parts = args[0].split("/");
-      var url = parts.shift() + ":443" + 
+      var url = parts.shift() + 
             if (parts.length == 0) ""
             else "/" + parts.join("/")
             ;
@@ -53,7 +53,7 @@ class TestHttps {
 		}
 		
       trace("Before async request");
-		https.customRequest(false, output, new Socket());
+		https.customRequest(false, output);
 		trace("After async request");		
 	}
 }

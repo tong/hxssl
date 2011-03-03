@@ -4,7 +4,7 @@ SYSTEM = Linux
 NDLL = ndll/$(SYSTEM)/tls.ndll
 OBJS :=  src/_bio.o src/_evp.o src/_hmac.o src/_ssl.o
 PATH_OPENSSL = /usr/local/ssl/include
-SSL_PATH=/usr/lib/ssl
+SSL_PATH = /usr/lib/ssl
 
 all : $(NDLL)
 
@@ -18,7 +18,6 @@ $(NDLL) : $(OBJS) Makefile
 
 test : $(NDLL)
 	(cd test; haxe build.hxml)
-	neko test/test.n
 
 install : $(NDLL)
 	cp $(NDLL) /usr/lib/neko
@@ -27,5 +26,5 @@ clean :
 	rm src/*.o
 	rm $(NDLL)
 
-.PHONY: clean all test install
+.PHONY: all test install clean
 	

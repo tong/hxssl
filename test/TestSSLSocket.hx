@@ -1,11 +1,6 @@
 
-#if neko
 import neko.Lib;
 import neko.tls.Socket;
-#else
-import cpp.Lib;
-import cpp.tls.Socket;
-#end
 
 class TestSSLSocket {
 	
