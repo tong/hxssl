@@ -1,0 +1,31 @@
+
+SYSTEM = Mac
+
+NDLL = ndll/$(SYSTEM)/tls.ndll
+OBJS :=  src/_bio.o src/_evp.o src/_hmac.o src/_ssl.o
+PATH_OPENSSL = /usr/local/ssl/include
+SSL_PATH = /usr/lib/ssl
+PATH_NEKO = /usr/lib/neko/include
+CFLAGS = -m32 -I$(PATH_NEKO)
+
+all : $(NDLL)
+
+%.o : src/%.c
+	$(CC) -I $(PATH_OPENSSL) -fPIC -c $< -o $@
+	
+$(NDLL) : $(OBJS) Makefile
+	$(CC) -I$(PATH_OPENSSL) -I$(PATH_NEKO) -m32 -shared -o $@ \
+		-lstdc++ -ldl -lssl -lneko -lcrypto $(OBJS)
+
+test : $(NDLL)
+	(cd test; haxe build.hxml)
+
+install : $(NDLL)
+	cp $(NDLL) /usr/lib/neko
+
+clean :
+	rm src/*.o
+	rm $(NDLL)
+
+.PHONY: all test install clean
+	
