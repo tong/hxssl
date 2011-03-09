@@ -1,6 +1,6 @@
 <project name="hxssl" url="https://github.com/tong/hxssl" license="LGPL">
 	<user name="delahee"/>
 	<tag v="neko"/>
-	<description>Allows openssl https calls, tls is implemented.</description>
-	<version name="1.1">Done some cleanup and emtted a more portable lib.</version>
+	<description>Allows openssl https calls, tls is implemented, no certificate checking yet available.</description>
+	<version name="1.2">Added Mac ndll.</version>
 </project>
