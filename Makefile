@@ -8,11 +8,11 @@ SSL_PATH = /usr/lib/ssl
 
 all : $(NDLL)
 
-%.o : src/%.c
+src/%.o : src/%.c
 	$(CC) -I $(PATH_OPENSSL) -fPIC -c $< -o $@
 	
 $(NDLL) : $(OBJS) Makefile
-	$(CC) -I$(PATH_OPENSSL) -I$(PATH_NEKO) -L$(SSL_PATH) -shared -o $@ \
+	$(CC) -I$(PATH_OPENSSL) -I$(PATH_NEKO) -L$(SSL_PATH) -shared -fPIC -o $@ \
 		-lstdc++ -ldl -lgc -lssl -lcrypto $(OBJS) \
 		/usr/lib/libcrypto.a /usr/lib/libssl.a
 
