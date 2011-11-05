@@ -1,11 +1,13 @@
 
-# SSL socket
--cp ../
+# SSLSocket
+#-cp ../
+-lib hxssl
 -neko test_socket.n
 -main TestSSLSocket
 
 # HTTPS
 --next
--cp ../
+#-cp ../
+-lib hxssl
 -neko test_https.n
 -main TestHttps

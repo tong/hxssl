@@ -1,30 +1,33 @@
 
-SYSTEM = Linux
-
-NDLL = ndll/$(SYSTEM)/tls.ndll
+OS = Linux
+NDLL := ndll/$(OS)/tls.ndll
+SSL_FLAGS := $(shell pkg-config --cflags --libs libcrypto)
+NEKO_FLAGS := -I/usr/lib/neko/include -L/usr/lib/neko -lneko -lz -ldl
 OBJS :=  src/_bio.o src/_evp.o src/_hmac.o src/_ssl.o
-PATH_OPENSSL = /usr/local/ssl/include
-SSL_PATH = /usr/lib/ssl
 
-all : $(NDLL)
+all : ndll
 
 src/%.o : src/%.c
-	$(CC) -I $(PATH_OPENSSL) -fPIC -c $< -o $@
+	$(CC) -I $(SSL_FLAGS) $(NEKO_FLAGS) -c $< -o $@
 	
-$(NDLL) : $(OBJS) Makefile
-	$(CC) -I$(PATH_OPENSSL) -I$(PATH_NEKO) -L$(SSL_PATH) -shared -fPIC -o $@ \
-		-lstdc++ -ldl -lgc -lssl -lcrypto $(OBJS) \
-		/usr/lib/libcrypto.a /usr/lib/libssl.a
+ndll : $(OBJS) Makefile
+	$(CC) -shared -fPIC -o $(NDLL) $(NEKO_FLAGS) $(OBJS)
 
-test : $(NDLL)
+tests : $(NDLL)
 	(cd test; haxe build.hxml)
 
-install : $(NDLL)
+haxelib:
+	( cd ..; zip -r hxssl/hxssl.zip hxssl -x hxssl/.* hxssl/_* hxssl/.git\* )
+	
+haxelib-test: haxelib
+	haxelib test hxssl.zip
+
+install-ndll : $(NDLL)
 	cp $(NDLL) /usr/lib/neko
 
 clean :
-	rm src/*.o
-	rm $(NDLL)
+	rm -f src/*.o
+	rm -f $(NDLL)
+	rm -f hxssl.zip
 
-.PHONY: all test install clean
-	
+.PHONY: all tests clean
