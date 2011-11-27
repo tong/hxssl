@@ -6,7 +6,6 @@ enum SocketHandle {}
 enum CTX {}
 enum TLS {}
 
-
 class Socket {
 
 	static function __init__() {
@@ -175,14 +174,14 @@ class Socket {
 	static var SSL_CTX_load_verify_locations = Loader.load( "_SSL_CTX_load_verify_locations", 2 );
 	static var SSLv23_client_method = Loader.load( "_SSLv23_client_method", 0 );
 	static var SSL_new = Loader.load( "_SSL_new", 1 );
-	static var BIO_new_socket = Loader.load( "_BIO_new_socket", 2 );
 	static var SSL_set_bio = Loader.load( "_SSL_set_bio", 3 );
-	static var BIO_NOCLOSE = Loader.load( "_BIO_NOCLOSE", 0 );
 	static var SSL_connect = Loader.load( "_SSL_connect", 1 );
 	static var SSL_set_fd = Loader.load ( "_SSL_set_fd", 2 );
 	static var SSL_CTX_set_verify_depth = Loader.load(  "_SSL_CTX_set_verify_depth", 2 );
 
 	static var BIO_new = Loader.load( "_BIO_new", 1 );
+	static var BIO_new_socket = Loader.load( "_BIO_new_socket", 2 );
+	static var BIO_NOCLOSE = Loader.load( "_BIO_NOCLOSE", 0 );
 	static var BIO_set_fd = Loader.load( "_BIO_set_fd", 3 );
 	static var BIO_s_socket = Loader.load( "_BIO_s_socket", 0 );
 

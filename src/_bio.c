@@ -1,25 +1,26 @@
-#include <neko.h>
+
 #include <stdio.h>
 #include <string.h>
+#include <neko.h>
 #include <openssl/bio.h>
 #include <openssl/err.h>
-#include "val_void.h"
+//#include "val_void.h"
 
 DEFINE_KIND( k_pointer);
 DEFINE_KIND( k_BIO);
 DEFINE_KIND( k_BIO_METHOD);
 
-//BIO *BIO_new_connect(char* host_port);
 value _BIO_new_connect(value host_port) {
 	void* ptr;
 	ptr = BIO_new_connect(val_string(host_port));
 	return alloc_abstract(k_pointer, ptr);
+	//return val_null;
 }
 
 //void ERR_load_BIO_strings(void);
 value _ERR_load_BIO_strings() {
 	ERR_load_BIO_strings();
-	return VAL_VOID;
+	return val_null;
 }
 
 //long	BIO_ctrl(BIO *bp,int cmd,long larg,void *parg);
@@ -73,7 +74,7 @@ value _BIO_set_conn_hostname(value b, value name) {
 //void	BIO_free_all(BIO *a);
 value _BIO_free_all(value a) {
 	BIO_free_all((BIO*) val_data(a));
-	return VAL_VOID;
+	return val_null;
 }
 
 #define val_sock(o)  ((int_val)val_data(o))

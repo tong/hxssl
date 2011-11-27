@@ -1,19 +1,31 @@
 
 HXSSL
 =====
-Updated fork of the neko-openssl project.
+OpenSSL haXe bindings.
+
+
+SOURCE
+------
+https://github.com/tong/hxssl
+git://github.com/tong/hxssl.git
+
+
+USAGE
+-----
+See: hxssl/test/*
 
 
 LINKS
 -----
-https://github.com/tong/hxssl
-http://code.google.com/p/neko-openssl/
+http://www.openssl.org/docs/
+
+
+HACKERS
+-------
+This project accepts and *encourages* contributions!
+See: https://github.com/tong/hxssl/issues
 
 
 AUTHORS
 -------
-judu
-andyli
-tong
-delahee
-robinp
+michael.pliskin, judu, andyli, tong, delahee, robinp
