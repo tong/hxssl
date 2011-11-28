@@ -4,8 +4,7 @@ INSTALL_PATH = /usr/lib/neko/
 #SSL_FLAGS := $(shell pkg-config --cflags --libs libcrypto)
 NDLL = ndll/$(OS)/tls.ndll
 NEKOPATH = -I/usr/lib/neko/include
-OBJS = src/_bio.o src/_evp.o src/_hmac.o src/_ssl.o \
-	src/_base64.o
+OBJS = src/_bio.o src/_evp.o src/_hmac.o src/_ssl.o # src/_base64.o src/_hash.o
 
 all: build
 
@@ -13,7 +12,7 @@ src/%.o: src/%.c
 	$(CC) $(NEKOPATH) -c $< -o $@
 
 $(NDLL): $(OBJS)
-	$(CC) -shared -o $(NDLL) $(NEKOPATH) $(OBJS) -lssl -lcrypto
+	$(CC) -shared -o $(NDLL) $(NEKOPATH)  $(shell pkg-config --cflags --libs libcrypto) $(OBJS) -lssl -lcrypto
 	
 build: $(NDLL)
 

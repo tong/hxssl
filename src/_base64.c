@@ -1,4 +1,5 @@
 #include <string.h>
+#include <openssl/bio.h>
 #include <openssl/evp.h>
 #include <openssl/buffer.h>
 #include <neko.h>
@@ -15,17 +16,18 @@ static value hxssl_base64_encode(value t) {
 	BIO_flush(b64);
 	BIO_get_mem_ptr(b64, &bptr);
 
-	char *buff = (char *) malloc(bptr->length);
-	memcpy(buff, bptr->data, bptr->length - 1);
-	buff[bptr->length - 1] = 0;
+	char *buf = (char *) malloc(bptr->length);
+	memcpy(buf, bptr->data, bptr->length - 1);
+	buf[bptr->length - 1] = 0;
 
 	BIO_free_all(b64);
 
-	return alloc_string(buff);
+	return alloc_string(buf);
 }
 
 static value hxssl_base64_decode(value t) {
 
+	//TPDP
 	BIO *b64, *bmem;
 
 	unsigned char *input = val_string(t);
