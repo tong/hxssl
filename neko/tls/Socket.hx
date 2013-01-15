@@ -19,8 +19,8 @@ class Socket {
 	var ctx : CTX;
 	var ssl : TLS;
 
-	public function new( ?s, ?certFile, ?certFolder ) {
-		initializeOpenSSL(certFile, certFolder);
+	public function new( ?s ) {
+		initializeOpenSSL();
 		__s = if( s == null ) socket_new(false) else s;
 		input = new SocketInput(__s);
 		output = new SocketOutput(__s);
@@ -31,6 +31,15 @@ class Socket {
 		trace("TODO not implemented");
 	}
 	*/
+	
+	public function setCertificateLocations ( ?certFile, ?certFolder ) {
+		#if !hxssl_no_cert_validation
+		var rsclvl : Int = SSL_CTX_load_verify_locations( ctx, certFile, certFolder );
+		if (rsclvl == 0)
+			throw "Failed to load certificates.";
+		SSL_CTX_set_verify( ctx );
+		#end
+	}
 	
 	public function connect( host : Host, port : Int ) {
 		try {
@@ -106,16 +115,11 @@ class Socket {
 		socket_set_blocking( __s, b );
 	}
 
-	function initializeOpenSSL( ?certFile:String, ?certFolder:String ) {
+	function initializeOpenSSL() {
 		SSL_library_init();
 		SSL_load_error_strings();
 		ctx = SSL_CTX_new( SSLv23_client_method() );
-		#if !hxssl_no_cert_validation
-		var rsclvl : Int = SSL_CTX_load_verify_locations( ctx, certFile, certFolder );
-		if (rsclvl == 0)
-			throw "Failed to load certificates.";
-		SSL_CTX_set_verify( ctx );
-		#end
+		setCertificate();
 	}
 
 	public static function select( read : Array<Socket>, write : Array<Socket>, others : Array<Socket>, timeout : Float )
