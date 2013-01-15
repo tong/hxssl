@@ -35,7 +35,7 @@ value _SSL_CTX_load_verify_locations(value ctx, value certFile, value certFolder
 	const char *sslCertFile = val_string(certFile);
 	if (sslCertFile == NULL)
 		sslCertFile = "/etc/ssl/certs/ca-bundle.crt";
-	const char *sslCertFolder = certFolder;
+	const char *sslCertFolder = val_string(certFolder);
 	if (sslCertFolder == NULL)
 		sslCertFolder = "/etc/ssl/certs";
 	return alloc_int(SSL_CTX_load_verify_locations((SSL_CTX*) val_data(ctx), sslCertFile, sslCertFolder));
