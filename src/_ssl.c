@@ -196,6 +196,8 @@ value SSL_recv_char(value ssl) {
 	//if(
 	int res = SSL_read((SSL*) val_data(ssl), &cc, 1);/*,MSG_NOSIGNAL)*/ //<= 0
 	//) return block_error();
+	if (res <= 0)
+        neko_error();
 	return alloc_int(cc);
 }
 
