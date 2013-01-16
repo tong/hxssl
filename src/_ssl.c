@@ -65,7 +65,6 @@ value _SSLv23_client_method() {
 }
 
 value _SSL_new(value ssl_ctx) {
-	printf("_SSL_new_SSL_new_SSL_new_SSL_new");
 	SSL* ssl = SSL_new((SSL_CTX*) val_data(ssl_ctx));
 	return alloc_abstract(k_ssl_ctx, ssl);
 }
