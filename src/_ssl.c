@@ -31,9 +31,14 @@ value _SSL_CTX_new(value meth) {
 	return alloc_abstract( k_ssl_ctx_pointer, ctx );
 }
 
-value _SSL_CTX_load_verify_locations(value ctx, /*value CAfile, */value CApath) {
-	return alloc_int(SSL_CTX_load_verify_locations((SSL_CTX*) val_data(ctx), /*val_string(CAfile)*/
-	NULL, val_string(CApath)));
+value _SSL_CTX_load_verify_locations(value ctx, value certFile, value certFolder) {
+	const char *sslCertFile = val_string(certFile);
+	if (!val_is_string(sslCertFile))
+		sslCertFile = "/etc/ssl/certs/ca-bundle.crt";
+	const char *sslCertFolder = val_string(certFolder);
+	if (!val_is_string(sslCertFolder))
+		sslCertFolder = "/etc/ssl/certs";
+	return alloc_int(SSL_CTX_load_verify_locations((SSL_CTX*) val_data(ctx), sslCertFile, sslCertFolder));
 }
 
 value _BIO_new_ssl_connect(value ctx) {
@@ -60,7 +65,6 @@ value _SSLv23_client_method() {
 }
 
 value _SSL_new(value ssl_ctx) {
-	printf("_SSL_new_SSL_new_SSL_new_SSL_new");
 	SSL* ssl = SSL_new((SSL_CTX*) val_data(ssl_ctx));
 	return alloc_abstract(k_ssl_ctx, ssl);
 }
@@ -80,10 +84,8 @@ value _SSL_connect(value ssl) {
 	return alloc_int(rsc);
 }
 
-value _SSL_CTX_set_verify(value ctx, value mode,
-		value(*callback)( value, value)) {
-	//TODO
-	//SSL_CTX_set_verify((SSL_CTX*) val_data(ctx), val_int(mode), );
+value _SSL_CTX_set_verify(value ctx) {
+	SSL_CTX_set_verify((SSL_CTX*) val_data(ctx), SSL_VERIFY_PEER, NULL);
 	return val_null;
 }
 
@@ -196,6 +198,8 @@ value SSL_recv_char(value ssl) {
 	//if(
 	int res = SSL_read((SSL*) val_data(ssl), &cc, 1);/*,MSG_NOSIGNAL)*/ //<= 0
 	//) return block_error();
+	if (res <= 0)
+        neko_error();
 	return alloc_int(cc);
 }
 
@@ -212,7 +216,7 @@ DEFINE_PRIM(_SSL_load_error_strings, 0);
 DEFINE_PRIM(_OpenSSL_add_all_algorithms, 0);
 DEFINE_PRIM(_SSL_library_init,0);
 DEFINE_PRIM(_SSL_CTX_new,1);
-DEFINE_PRIM(_SSL_CTX_load_verify_locations,2) //!!
+DEFINE_PRIM(_SSL_CTX_load_verify_locations,3);
 DEFINE_PRIM(_BIO_new_ssl_connect,1);
 DEFINE_PRIM(_BIO_get_ssl,1);
 DEFINE_PRIM(_SSL_set_mode, 2);
@@ -223,6 +227,7 @@ DEFINE_PRIM(_SSL_set_bio, 3);
 DEFINE_PRIM(_BIO_NOCLOSE, 0);
 DEFINE_PRIM(_SSL_connect, 1);
 DEFINE_PRIM(_SSL_set_fd, 2);
+DEFINE_PRIM(_SSL_CTX_set_verify, 1);
 DEFINE_PRIM(_SSL_CTX_set_verify_depth, 2);
 DEFINE_PRIM(_SSL_read, 3);
 DEFINE_PRIM(_SSL_write, 3);
