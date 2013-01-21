@@ -13,6 +13,10 @@ class SocketOutput extends haxe.io.Output {
 	public function new( s ) {
 		__s = s;
 	}
+	
+	public override function writeByte( c : Int ) {
+		writeChar( c );
+	}
 
 	public function writeChar( c : Int ) {
 		try {
