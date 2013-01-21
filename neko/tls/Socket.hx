@@ -119,7 +119,7 @@ class Socket {
 		SSL_library_init();
 		SSL_load_error_strings();
 		ctx = SSL_CTX_new( SSLv23_client_method() );
-		setCertificate();
+		setCertificateLocations();
 	}
 
 	public static function select( read : Array<Socket>, write : Array<Socket>, others : Array<Socket>, timeout : Float )
