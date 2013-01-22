@@ -13,6 +13,10 @@ class SocketInput extends haxe.io.Input {
 	public function new( s ) {
 		__s = s;
 	}
+	
+	public override function readByte() : Int {
+		return readChar();
+	}
 
 	public function readChar() : Int {
 		try {
