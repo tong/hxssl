@@ -27,23 +27,31 @@ value _SSL_library_init() {
 
 value _SSL_CTX_new(value meth) {
 	//val_is_abstract(meth);
-	SSL_CTX * ctx = SSL_CTX_new( val_data(meth) );
+	SSL_CTX * ctx = SSL_CTX_new( (const SSL_METHOD* ) val_data(meth) );
 	return alloc_abstract( k_ssl_ctx_pointer, ctx );
 }
 
 value _SSL_CTX_load_verify_locations(value ctx, value certFile, value certFolder) {
+	
 	const char *sslCertFile = val_string(certFile);
+	const char * sslCertFolder;
+
 	if (!val_is_string(sslCertFile))
 		sslCertFile = "/etc/ssl/certs/ca-bundle.crt";
-	const char *sslCertFolder = val_string(certFolder);
-	if (!val_is_string(sslCertFolder))
+	
+	sslCertFolder = val_string(certFolder);
+	if(!val_is_string(sslCertFolder))
 		sslCertFolder = "/etc/ssl/certs";
+
+	
 	return alloc_int(SSL_CTX_load_verify_locations((SSL_CTX*) val_data(ctx), sslCertFile, sslCertFolder));
 }
+
 
 value _BIO_new_ssl_connect(value ctx) {
 	return alloc_abstract(k_ssl_ctx_pointer,BIO_new_ssl_connect((SSL_CTX*) val_data(ctx)));
 }
+
 
 value _BIO_get_ssl(value b/*, value sslp*/) {
 	SSL* r_ssl = NULL;
