@@ -224,6 +224,8 @@ DEFINE_PRIM(_SSL_load_error_strings, 0);
 DEFINE_PRIM(_OpenSSL_add_all_algorithms, 0);
 DEFINE_PRIM(_SSL_library_init,0);
 DEFINE_PRIM(_SSL_CTX_new,1);
+DEFINE_PRIM(_SSL_CTX_load_verify_locations,1);
+DEFINE_PRIM(_SSL_CTX_load_verify_locations,2);
 DEFINE_PRIM(_SSL_CTX_load_verify_locations,3);
 DEFINE_PRIM(_BIO_new_ssl_connect,1);
 DEFINE_PRIM(_BIO_get_ssl,1);
