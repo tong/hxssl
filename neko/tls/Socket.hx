@@ -18,6 +18,9 @@ class Socket {
 	var __s : SocketHandle;
 	var ctx : CTX;
 	var ssl : TLS;
+	
+	var certFile : String;
+	var certFolder : String;
 
 	public function new( ?s ) {
 		initializeOpenSSL();
@@ -33,17 +36,14 @@ class Socket {
 	*/
 	
 	public function setCertificateLocations ( ?certFile, ?certFolder ) {
-		#if !hxssl_no_cert_validation
-		var rsclvl : Int = SSL_CTX_load_verify_locations( ctx, certFile, certFolder );
-		if (rsclvl == 0)
-			throw "Failed to load certificates.";
-		SSL_CTX_set_verify( ctx );
-		#end
+		this.certFile = certFile;
+		this.certFolder = certFolder;
 	}
 	
 	public function connect( host : Host, port : Int ) {
 		try {
 			socket_connect(__s, host.ip, port);
+			ctx = buildSslContext();
 			ssl = SSL_new( ctx );
 			input.ssl = ssl;
 			output.ssl = ssl;
@@ -59,6 +59,8 @@ class Socket {
 	}
 
 	public function close() {
+		SSL_close( ssl );
+		SSL_CTX_close( ctx );
 		socket_close( __s );
 		untyped {
 			input.__s = null;
@@ -118,8 +120,17 @@ class Socket {
 	function initializeOpenSSL() {
 		SSL_library_init();
 		SSL_load_error_strings();
-		ctx = SSL_CTX_new( SSLv23_client_method() );
-		setCertificateLocations();
+	}
+	
+	function buildSslContext() {
+		var ctx = SSL_CTX_new( SSLv23_client_method() );
+		#if !hxssl_no_cert_validation
+		var rsclvl : Int = SSL_CTX_load_verify_locations( ctx, certFile, certFolder );
+		if (rsclvl == 0)
+			throw "Failed to load certificates.";
+		SSL_CTX_set_verify( ctx );
+		#end
+		return ctx;
 	}
 
 	public static function select( read : Array<Socket>, write : Array<Socket>, others : Array<Socket>, timeout : Float )
@@ -178,9 +189,11 @@ class Socket {
 	static var SSL_load_error_strings = Loader.load( "_SSL_load_error_strings", 0 );
 	static var SSL_library_init = Loader.load( "_SSL_library_init", 0 );
 	static var SSL_CTX_new = Loader.load( "_SSL_CTX_new", 1 );
+	static var SSL_CTX_close = Loader.load( "_SSL_CTX_close", 1 );
 	static var SSL_CTX_load_verify_locations = Loader.load( "_SSL_CTX_load_verify_locations", 3 );
 	static var SSLv23_client_method = Loader.load( "_SSLv23_client_method", 0 );
 	static var SSL_new = Loader.load( "_SSL_new", 1 );
+	static var SSL_close = Loader.load( "_SSL_close", 1 );
 	static var SSL_set_bio = Loader.load( "_SSL_set_bio", 3 );
 	static var SSL_connect = Loader.load( "_SSL_connect", 1 );
 	static var SSL_set_fd = Loader.load ( "_SSL_set_fd", 2 );

@@ -31,6 +31,11 @@ value _SSL_CTX_new(value meth) {
 	return alloc_abstract( k_ssl_ctx_pointer, ctx );
 }
 
+value _SSL_CTX_close(value ssl_ctx) {
+	SSL_CTX_free((SSL_CTX*) val_data(ssl_ctx));
+	return val_null;
+}
+
 value _SSL_CTX_load_verify_locations(value ctx, value certFile, value certFolder) {
 	
 	const char *sslCertFile = val_string(certFile);
@@ -75,6 +80,11 @@ value _SSLv23_client_method() {
 value _SSL_new(value ssl_ctx) {
 	SSL* ssl = SSL_new((SSL_CTX*) val_data(ssl_ctx));
 	return alloc_abstract(k_ssl_ctx, ssl);
+}
+
+value _SSL_close(value ssl) {
+	SSL_free((SSL*) val_data(ssl));
+	return val_null;
 }
 
 value _SSL_set_bio(value s, value rbio, value wbio) {
@@ -224,6 +234,7 @@ DEFINE_PRIM(_SSL_load_error_strings, 0);
 DEFINE_PRIM(_OpenSSL_add_all_algorithms, 0);
 DEFINE_PRIM(_SSL_library_init,0);
 DEFINE_PRIM(_SSL_CTX_new,1);
+DEFINE_PRIM(_SSL_CTX_close,1);
 DEFINE_PRIM(_SSL_CTX_load_verify_locations,1);
 DEFINE_PRIM(_SSL_CTX_load_verify_locations,2);
 DEFINE_PRIM(_SSL_CTX_load_verify_locations,3);
@@ -233,6 +244,7 @@ DEFINE_PRIM(_SSL_set_mode, 2);
 DEFINE_PRIM(_SSL_MODE_AUTO_RETRY, 0);
 DEFINE_PRIM(_SSLv23_client_method, 0);
 DEFINE_PRIM(_SSL_new, 1);
+DEFINE_PRIM(_SSL_close, 1);
 DEFINE_PRIM(_SSL_set_bio, 3);
 DEFINE_PRIM(_BIO_NOCLOSE, 0);
 DEFINE_PRIM(_SSL_connect, 1);
