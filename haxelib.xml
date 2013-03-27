@@ -1,6 +1,6 @@
 <project name="hxssl" url="https://github.com/tong/hxssl" license="Public">
 	<user name="delahee"/>
 	<tag v="neko"/>
-	<description>OpenSSL haXe bindings</description>
+	<description>OpenSSL neko bindings</description>
 	<version name="1.5">Misc</version>
 </project>
