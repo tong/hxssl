@@ -1,31 +1,7 @@
 
 HXSSL
 =====
-OpenSSL haXe bindings.
+Haxe/Neko OpenSSL bindings.
 
-
-SOURCE
-------
-https://github.com/tong/hxssl
-git://github.com/tong/hxssl.git
-
-
-USAGE
------
-See: hxssl/test/*
-
-
-LINKS
------
-http://www.openssl.org/docs/
-
-
-HACKERS
--------
 This project accepts and *encourages* contributions!
 See: https://github.com/tong/hxssl/issues
-
-
-AUTHORS
--------
-michael.pliskin, judu, andyli, tong, delahee, robinp
