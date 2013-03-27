@@ -4,7 +4,7 @@ import neko.tls.Socket;
 
 private class ClosableBytesOutput extends haxe.io.BytesOutput {
 	public dynamic function onClose() {}
-	public function new() super()
+	public function new() super();
 	override public function close() {
 		super.close();
 		onClose();
@@ -15,7 +15,7 @@ class TestHttps {
 
 	static function main() {
 
-		var args = neko.Sys.args();
+		var args = Sys.args();
 		if (args.length < 1) {
 			Lib.println( "Usage: TestHttps.n <url>" );
 			return;
@@ -23,7 +23,7 @@ class TestHttps {
 		var parts = args[0].split("/");
 		var url = parts.shift() + if( parts.length == 0 ) "" else "/" + parts.join("/");
 
-		Lib.println( "Requesting from URL: "+url );
+		Sys.println( "Requesting from URL: "+url );
 
 		var https : haxe.Http = new haxe.Http( url );
 		var output  = new ClosableBytesOutput();
