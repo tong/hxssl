@@ -7,6 +7,6 @@
 	<tag v="openssl"/>
 	<tag v="crypto"/>
 	<tag v="https"/>
-	<description>Sys/OpenSSL bindings</description>
+	<description>Cpp/Neko OpenSSL bindings</description>
 	<version name="1.5">Misc</version>
 </project>
