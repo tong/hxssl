@@ -12,6 +12,9 @@ class Socket {
 		neko.Lib.load( "std", "socket_init", 0 )();
 	}
 
+	public static var CERTIFICATE_FILE : String;
+	public static var CERTIFICATE_FOLDER : String;
+
 	public var input(default,null) : SocketInput;
 	public var output(default,null) : SocketOutput;
 
@@ -19,9 +22,6 @@ class Socket {
 	var ctx : CTX;
 	var ssl : TLS;
 	
-	var certFile : String;
-	var certFolder : String;
-
 	public function new( ?s ) {
 		initializeOpenSSL();
 		__s = if( s == null ) socket_new(false) else s;
@@ -35,15 +35,10 @@ class Socket {
 	}
 	*/
 	
-	public function setCertificateLocations ( ?certFile, ?certFolder ) {
-		this.certFile = certFile;
-		this.certFolder = certFolder;
-	}
-	
 	public function connect( host : Host, port : Int ) {
 		try {
 			socket_connect(__s, host.ip, port);
-			ctx = buildSslContext();
+			ctx = buildSSLContext();
 			ssl = SSL_new( ctx );
 			input.ssl = ssl;
 			output.ssl = ssl;
@@ -122,10 +117,10 @@ class Socket {
 		SSL_load_error_strings();
 	}
 	
-	function buildSslContext() {
+	function buildSSLContext() {
 		var ctx = SSL_CTX_new( SSLv23_client_method() );
 		#if !hxssl_no_cert_validation
-		var rsclvl : Int = SSL_CTX_load_verify_locations( ctx, certFile, certFolder );
+		var rsclvl : Int = SSL_CTX_load_verify_locations( ctx, neko.Lib.haxeToNeko(CERTIFICATE_FILE), neko.Lib.haxeToNeko(CERTIFICATE_FOLDER) );
 		if (rsclvl == 0)
 			throw "Failed to load certificates.";
 		SSL_CTX_set_verify( ctx );

@@ -38,17 +38,16 @@ value _SSL_CTX_close(value ssl_ctx) {
 
 value _SSL_CTX_load_verify_locations(value ctx, value certFile, value certFolder) {
 	
-	const char *sslCertFile = val_string(certFile);
+	const char * sslCertFile = val_string(certFile);
 	const char * sslCertFolder;
-
-	if (!val_is_string(sslCertFile))
+	
+	if (!val_is_string(certFile))
 		sslCertFile = "/etc/ssl/certs/ca-bundle.crt";
 	
 	sslCertFolder = val_string(certFolder);
-	if(!val_is_string(sslCertFolder))
+	if(!val_is_string(certFolder))
 		sslCertFolder = "/etc/ssl/certs";
-
-	
+		
 	return alloc_int(SSL_CTX_load_verify_locations((SSL_CTX*) val_data(ctx), sslCertFile, sslCertFolder));
 }
 
