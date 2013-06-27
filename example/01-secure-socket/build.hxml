@@ -1,0 +1,12 @@
+
+-main TestSecureSocket
+-lib ssl
+--each
+
+--next
+-neko test.n
+
+--next
+-cpp cpp
+#-D HXCPP_M64
+-cmd mv cpp/TestSecureSocket ./test
