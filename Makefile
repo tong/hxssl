@@ -1,34 +1,50 @@
 
+#
+# hxssl
+#
+
 OS = Linux
-INSTALL_PATH = /usr/lib/neko/
-#SSL_FLAGS := $(shell pkg-config --cflags --libs libcrypto)
-NDLL = ndll/$(OS)/tls.ndll
-NEKOPATH = -I/usr/lib/neko/include
-OBJS = src/_bio.o src/_evp.o src/_hmac.o src/_ssl.o # src/_base64.o src/_hash.o
 
-all: build
+uname_M := $(shell sh -c 'uname -m 2>/dev/null || echo not')
+ifeq (${uname_M},x86_64)
+	OS = Linux64
+else ifeq (${uname_M},armv6l)
+	OS = RPi
+else ifeq (${uname_M},armv7l)
+	OS = RPi
+endif
 
-src/%.o: src/%.c
-	$(CC) $(NEKOPATH) -c $< -o $@
+NDLL:=ndll/$(OS)/ssl.ndll
+SRC_PATHS:=src
+CPP_SRCS:=src/hxssl_ssl.cpp src/hxssl_base64.cpp
+OBJS:=${CPP_SRCS:.cpp=.o}
+
+CX:=g++ -Isrc
+SSL_FLAGS:=$(shell pkg-config --libs --cflags libssl)
+NEKO_FLAGS:=-fpic -fPIC -DHX_LINUX -DHXCPP_VISIT_ALLOCS -I$(HXCPP)/include -ldl -fvisibility=hidden -O2
+CPPFLAGS += $(SSL_FLAGS) $(NEKO_FLAGS)
+LDFLAGS +=-fPIC -shared -L/usr/lib -lz -ldl -rdynamic -g3 -Xlinker --no-undefined $(SSL_FLAGS)
+
+all: ndll
 
 $(NDLL): $(OBJS)
-	$(CC) -shared -o $(NDLL) $(NEKOPATH)  $(shell pkg-config --cflags --libs libcrypto) $(OBJS) -lssl -lcrypto
+	@mkdir -p ndll/$(OS)
+	$(CX) $(CFLAGS) $(OBJS) -o $(NDLL) $(LDFLAGS)
+
+ndll: $(NDLL)
+
+ssl.zip: clean ndll
+	zip -r $@ ndll src sys test/unit/*.hx* haxelib.json -x "_*" "*.o"
 	
-build: $(NDLL)
+haxelib: ssl.zip
 
-haxelib-zip: clean build
-	(cd ..; zip -r hxssl/hxssl.zip hxssl -x hxssl/.* hxssl/_* hxssl/src*.o hxssl/.git )
+install: haxelib
+	haxelib local ssl.zip
 
-haxelib-test: haxelib-zip
-	haxelib test hxssl.zip
-
-haxelib-submit: haxelib-zip
-	haxelib submit hxssl.zip
-
-install: build
-	cp $(NDLL) $(INSTALL_PATH)
-	
+uninstall:
+	haxelib remove ssl
+		
 clean:
-	rm -f src/*.o $(NDLL) hxssl.zip
-
-.PHONY: all build install clean
+	rm -f $(NDLL)
+	rm -f $(OBJS)
+	rm -f ssl.zip
