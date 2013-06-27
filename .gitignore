@@ -1,4 +1,5 @@
 *.o
 *sublime-*
 TODO
-
+_*
+.zip

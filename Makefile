@@ -16,7 +16,7 @@ endif
 
 NDLL:=ndll/$(OS)/ssl.ndll
 SRC_PATHS:=src
-CPP_SRCS:=src/hxssl_ssl.cpp src/hxssl_base64.cpp
+CPP_SRCS:=src/hxssl_ssl.cpp src/hxssl_base64.cpp src/hxssl_md5.cpp
 OBJS:=${CPP_SRCS:.cpp=.o}
 
 CX:=g++ -Isrc
