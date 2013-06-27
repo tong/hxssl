@@ -1,0 +1,12 @@
+
+-lib ssl
+-main Run
+--each
+
+--next
+-neko test.n
+
+--next
+-cpp bin
+#-D HXCPP_M64 #TODO
+-cmd cp bin/Run ./test
