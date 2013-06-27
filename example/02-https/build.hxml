@@ -1,6 +1,6 @@
 
 -main TestHttps
--lib ssl
+-lib hxssl
 --each
 
 --next
@@ -8,5 +8,4 @@
 
 --next
 -cpp cpp
-#-D HXCPP_M64
 -cmd mv cpp/TestHttps ./test

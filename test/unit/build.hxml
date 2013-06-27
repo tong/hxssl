@@ -1,5 +1,5 @@
 
--lib ssl
+-lib hxssl
 -main Run
 --each
 
@@ -7,6 +7,5 @@
 -neko test.n
 
 --next
--cpp bin
-#-D HXCPP_M64 #TODO
--cmd cp bin/Run ./test
+-cpp cpp
+-cmd cp cpp/Run ./test
