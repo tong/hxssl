@@ -11,31 +11,23 @@ import neko.Lib;
 */
 class Base64 {
 
-	/**
-	*/
 	public static inline function encode( s : String ) : String {
-		#if neko
-		return Lib.nekoToHaxe( _encode( untyped s.__s ) );
-		#else
+		#if cpp
 		return _encode( s );
+		#elseif neko
+		return Lib.nekoToHaxe( _encode( Lib.haxeToNeko(s) ) );
 		#end
 	}
 	
-	/**
-	*/
 	public static inline function decode( s : String ) : String {
-		#if neko
-		return Lib.nekoToHaxe( _decode( s ) );
-		#elseif cpp
+		#if cpp
 		return _decode( s );
+		#elseif neko
+		return Lib.nekoToHaxe( _decode( Lib.haxeToNeko(s) ) );
 		#end
 	}
 	
-	private static var _encode = std( "base64_encode", 1 );
-	private static var _decode = std( "base64_decode", 1 );
-	
-	private static inline function std( f : String, args : Int ) : Dynamic {
-		return Lib.load( 'ssl', 'hxssl_'+f, args );
-	}
+	private static inline function _encode( s : String ) { return Lib.load( "ssl", "hxssl_base64_encode", 1 )(s); }
+	private static inline function _decode( s : String ) { return Lib.load( "ssl", "hxssl_base64_decode", 1 )(s); }
 	
 }
