@@ -3,7 +3,6 @@
 # hxssl
 #
 
-PROJECT=hxssl
 OS=Linux
 NDLL_FLAGS=
 SRC = src/*.cpp
@@ -25,18 +24,27 @@ endif
 
 NDLL = ndll/$(OS)/ssl.ndll
 
-all: ndll
+all: ndll #test examples
 
 $(NDLL): $(SRC)
 	@(cd src;haxelib run hxcpp build.xml $(NDLL_FLAGS);)
 
 ndll: $(NDLL)
 
-test: $(HX_SRC) test/unit/*.hx*
-	@(cd test/unit;haxe build.hxml $(HXCPP_FLAGS))
-	@echo '---------------------------------------------------------'
-	@(cd test/unit;neko test.n)
-	@echo '---------------------------------------------------------'
+examples: $(SRC)
+	(cd examples/01-*/;haxe build.hxml $(HXCPP_FLAGS))
+	(cd examples/02-*/;haxe build.hxml $(HXCPP_FLAGS))
+	(cd examples/03-*/;haxe build.hxml $(HXCPP_FLAGS))
+
+test-cpp: $(HX_SRC) test/*.hx*
+	@(cd test;haxe build-cpp.hxml $(HXCPP_FLAGS))
+	@(cd test;./test)
+
+test-neko: $(HX_SRC) test/*.hx*
+	@(cd test;haxe build-neko.hxml)
+	@(cd test;neko test.n)
+
+test: test-cpp test-neko
 
 ssl.zip: clean ndll
 	zip -r $@ ndll/ sys/ haxelib.json README.md -x "*_*" "*.o"
@@ -50,10 +58,12 @@ uninstall:
 	haxelib remove ssl
 
 clean:
-	rm -rf example/0*-*/cpp
-	rm -f example/0*-*/test*
+	rm -rf examples/0*-*/cpp
+	rm -f examples/0*-*/test*
 	rm -f $(NDLL)
 	rm -rf src/obj
+	rm -rf test/cpp
+	rm -f test/test*
 	rm -f ssl.zip
 
-.PHONY: ndll haxelib install uninstall clean
+.PHONY: ndll examples tests haxelib install uninstall clean

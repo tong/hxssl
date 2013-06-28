@@ -1,5 +1,0 @@
-
--lib ssl
--dce full
--main Run
--neko test.n

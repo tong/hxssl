@@ -1,6 +1,6 @@
 
 -main TestSecureSocket
--lib hxssl
+-lib ssl
 --each
 
 --next

@@ -33,7 +33,7 @@ private typedef AbstractSocket = {
 	function write( str : String ) : Void;
 	function close() : Void;
 	function shutdown( read : Bool, write : Bool ) : Void;
-	#if hxssl
+	#if ssl
 	function setCertLocation( file : String, folder : String ) : Void;
 	#end
 }
@@ -76,7 +76,7 @@ class Http {
 	public static var PROXY : { host : String, port : Int, auth : { user : String, pass : String } } = null;
 	#end
 
-	#if hxssl
+	#if ssl
 	public var certFile : String;
 	public var certFolder : String;
 	#end
@@ -359,14 +359,14 @@ class Http {
 			if( secure ) {
 				#if php
 				sock = new php.net.SslSocket();
-				#elseif hxssl
+				#elseif ssl
 				sock = new sys.ssl.Socket();
 				sock.setCertLocation( certFile, certFolder );
 				#else
-				throw "Https is only supported with -lib hxssl";
+				throw "Https is only supported with -lib ssl";
 				#end
 			} else {
-				#if !hxssl
+				#if !ssl
 				sock = new sys.net.Socket();
 				#end
 			}

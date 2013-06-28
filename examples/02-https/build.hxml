@@ -1,6 +1,6 @@
 
 -main TestHttps
--lib hxssl
+-lib ssl
 --each
 
 --next

@@ -1,5 +1,5 @@
 {
-	"name" : "hxssl",
+	"name" : "ssl",
 	"url" : "https://github.com/tong/hxssl",
 	"license" : "Public",
 	"tags" : ["ssl","openssl","secure","crypto","https","tls","socket","hash","base64","md5"],
