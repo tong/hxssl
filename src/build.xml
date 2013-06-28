@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- hxssl -->
+
+<xml>
+
+	<include name="${HXCPP}/build-tool/BuildCommon.xml"/>
+
+	<set name="DBG" value="d" if="debug" />
+	<set name="ROOT" value="../" unless="ROOT"/>
+
+	<files id="files">
+		<file name="hxssl_ssl.cpp"/>
+		<file name="hxssl_md5.cpp"/>
+		<file name="hxssl_base64.cpp"/>
+		<!--
+		<file name="hxssl_sha.cpp"/>
+		-->
+	</files>
+
+	<target id="ssl.ndll" tool="linker" toolid="dll" output="ssl">
+		<ext value=".ndll"/>
+		<outdir name="../ndll/${BINDIR}"/>
+		<flag value="${LIB_DIR}"/>
+		<files id="files"/>
+		<lib name="-lssl" if="linux"/>
+		<lib name="-lcrypto" if="linux"/>
+	</target>
+
+	<target id="default">
+		<target id="ssl.ndll"/>
+	</target>
+
+</xml>
