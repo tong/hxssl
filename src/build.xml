@@ -14,6 +14,7 @@
 		<file name="hxssl_md5.cpp"/>
 		<file name="hxssl_base64.cpp"/>
 		<file name="hxssl_sha1.cpp"/>
+		<file name="hxssl_sha256.cpp"/>
 		<file name="hxssl_ripemd.cpp"/>
 	</files>
 

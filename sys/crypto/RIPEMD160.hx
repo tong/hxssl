@@ -10,7 +10,9 @@ import neko.Lib;
 	RIPEMD-160
 */
 class RIPEMD160 {
-	
+
+	public static inline var DIGEST_LENGTH = 20;
+
 	public static inline function encode( s : String ) : String {
 		#if cpp
 		return _ripemd160( s );
