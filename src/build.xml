@@ -13,9 +13,7 @@
 		<file name="hxssl_ssl.cpp"/>
 		<file name="hxssl_md5.cpp"/>
 		<file name="hxssl_base64.cpp"/>
-		<!--
-		<file name="hxssl_sha.cpp"/>
-		-->
+		<file name="hxssl_sha1.cpp"/>
 	</files>
 
 	<target id="ssl.ndll" tool="linker" toolid="dll" output="ssl">
