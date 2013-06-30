@@ -23,8 +23,8 @@
 		<outdir name="../ndll/${BINDIR}"/>
 		<flag value="${LIB_DIR}"/>
 		<files id="files"/>
-		<lib name="-lssl" if="linux"/>
-		<lib name="-lcrypto" if="linux"/>
+		<lib name="-lssl"/>
+		<lib name="-lcrypto"/>
 	</target>
 
 	<target id="default">

@@ -5,36 +5,49 @@
 
 OS=Linux
 NDLL_FLAGS=
-SRC = src/*.cpp
-HX_SRC = sys/crypto/*.hx sys/ssl/*.hx
-HXCPP_FLAGS =
+HXCPP_FLAGS=
 
-uname_M := $(shell sh -c 'uname -m 2>/dev/null || echo not')
-ifeq (${uname_M},x86_64)
-	OS = Linux64
-	NDLL_FLAGS += -DHXCPP_M64
-	HXCPP_FLAGS += -D HXCPP_M64
-else ifeq (${uname_M},armv6l)
-	OS = RPi
-	HXCPP_FLAGS += -D RPi
-else ifeq (${uname_M},armv7l)
-	OS = RPi
-	HXCPP_FLAGS += -D RPi
+OS = $(shell sh -c 'uname -s 2>/dev/null || echo not')
+MACHINE = $(shell sh -c 'uname -m 2>/dev/null || echo not')
+#LBITS = $(shell getconf LONG_BIT)
+
+ifeq ($(OS),Linux)
+	ifeq ($(MACHINE),$(filter $(MACHINE),armv6l armv7l))
+		OS=RPi
+		NDLL_FLAGS += -DRPi
+		HXCPP_FLAGS += -D RPi
+	else ifeq ($(MACHINE),x86_64)
+		OS=Linux64
+		NDLL_FLAGS+=-DHXCPP_M64
+		HXCPP_FLAGS+=-D HXCPP_M64
+	else
+		OS=Linux
+	endif
+else ifeq ($(OS),Darwin)
+	OS=Mac
+	ifeq ($(MACHINE),x86_64)
+		NDLL_FLAGS+=-DHXCPP_M64
+		HXCPP_FLAGS+=-D HXCPP_M64
+	endif
+#TODO else ifeq ($(OS),Win)
 endif
 
-NDLL = ndll/$(OS)/ssl.ndll
+NDLL=ndll/$(OS)/ssl.ndll
+SRC_CPP=src/*.cpp
+SRC_HX=sys/crypto/*.hx sys/ssl/*.hx
 
 all: ndll #test examples
 
 $(NDLL): $(SRC)
-	@(cd src;haxelib run hxcpp build.xml $(NDLL_FLAGS);)
+	@echo "Building ndll for $(OS) $(MACHINE)"
+	(cd src;haxelib run hxcpp build.xml $(NDLL_FLAGS);)
 
 ndll: $(NDLL)
 
 examples: $(SRC)
-	(cd examples/01-*/;haxe build.hxml $(HXCPP_FLAGS))
-	(cd examples/02-*/;haxe build.hxml $(HXCPP_FLAGS))
-	(cd examples/03-*/;haxe build.hxml $(HXCPP_FLAGS))
+	@(cd examples/01-*/;haxe build.hxml $(HXCPP_FLAGS))
+	@(cd examples/02-*/;haxe build.hxml $(HXCPP_FLAGS))
+	@(cd examples/03-*/;haxe build.hxml $(HXCPP_FLAGS))
 
 test-cpp: $(HX_SRC) test/*.hx*
 	@(cd test;haxe build-cpp.hxml $(HXCPP_FLAGS))
@@ -58,10 +71,11 @@ uninstall:
 	haxelib remove ssl
 
 clean:
-	rm -rf examples/0*-*/cpp
-	rm -f examples/0*-*/test*
+	#rm -rf examples/0*-*/cpp && rm -f examples/0*-*/test*
 	rm -f $(NDLL)
 	rm -rf src/obj
+	rm -rf src/obj
+	rm -f src/*.o
 	rm -rf test/cpp
 	rm -f test/test*
 	rm -f ssl.zip
