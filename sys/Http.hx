@@ -76,10 +76,10 @@ class Http {
 	public static var PROXY : { host : String, port : Int, auth : { user : String, pass : String } } = null;
 	#end
 
-	#if ssl
+#if ssl
 	public var certFile : String;
 	public var certFolder : String;
-	#end
+#end
 
 	/**
 		Creates a new Http instance with `url` as parameter.
@@ -366,7 +366,9 @@ class Http {
 				throw "Https is only supported with -lib ssl";
 				#end
 			} else {
-				#if !ssl
+				#if ssl
+				sock = new sys.ssl.Socket();
+				#else
 				sock = new sys.net.Socket();
 				#end
 			}

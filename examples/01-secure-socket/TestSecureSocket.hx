@@ -1,13 +1,23 @@
 
 import haxe.io.Bytes;
+import sys.ssl.Socket;
 
 class TestSecureSocket {
 	
 	static function connectXMPPServer( ip : String, host : String, port : Int = 5223 ) {
 
 		Sys.println( 'Connecting to : $ip ...' );
-		var socket = new sys.ssl.Socket();
-		socket.setCertLocation( '/etc/ssl/certs/ca-certificates.crt', '/etc/ssl/certs' );
+		
+		var socket = new Socket();
+		
+		// Set cert paths
+		switch( Sys.systemName() ) {
+		case 'Linux':
+			socket.setCertLocation( '/etc/ssl/certs/ca-certificates.crt', '/etc/ssl/certs' );
+		default:
+			trace("??????????????????????????????????????");
+		}
+		
 		socket.connect( new sys.net.Host(ip), port );
 		Sys.println( 'Connected' );
 		

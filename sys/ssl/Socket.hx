@@ -14,17 +14,19 @@ import cpp.Lib;
 import neko.Lib;
 #end
 
-private enum SocketHandle {}
+//private enum SocketHandle {}
+private typedef SocketHandle = Dynamic;
 private typedef CTX = Dynamic;
 private typedef SSL = Dynamic;
 
 private class SocketInput extends haxe.io.Input {
 
-	@:allow(sys.ssl.Socket) private var __s : Dynamic;
+	@:allow(sys.ssl.Socket) private var __s : SocketHandle;
 	@:allow(sys.ssl.Socket) private var ssl : SSL;
 
-	public function new(s) {
-		__s = s;
+	public function new( s : SocketHandle, ?ssl : SSL ) {
+		this.__s = s;
+		this.ssl = ssl;
 	}
 
 	public override function readByte() {
@@ -42,7 +44,7 @@ private class SocketInput extends haxe.io.Input {
 
 	public override function readBytes( buf : Bytes, pos : Int, len : Int ) : Int {
 		var r;
-		if(  ssl == null || __s == null )
+		if( ssl == null || __s == null )
 			throw "Invalid handle";
 		try {
 			r = socket_recv(  ssl, buf.getData(), pos, len );
@@ -70,7 +72,7 @@ private class SocketInput extends haxe.io.Input {
 
 private class SocketOutput extends haxe.io.Output {
 
-	@:allow(sys.ssl.Socket) private var __s : Dynamic;
+	@:allow(sys.ssl.Socket) private var __s : SocketHandle;
 	@:allow(sys.ssl.Socket) private var ssl : SSL;
 
 	public function new(s) {
@@ -122,6 +124,8 @@ class Socket {
 	public var output(default,null) : SocketOutput;
 	public var custom : Dynamic;
 	//public var validateCert : Bool;
+	//public var connected : Bool;
+	//public var secure : Bool;
 	
 	private var __s : Dynamic;
 	private var ctx : CTX;
@@ -130,43 +134,16 @@ class Socket {
 	private var certFolder : String;
 
 	public function new() {
-		//this.validateCert = validateCert;
+		//connected = secure = false;
 		initSSL();
 		__s = socket_new( false );
 		input = new SocketInput( __s );
 		output = new SocketOutput( __s );
 	}
 
-	public function setCertLocation( file : String, folder : String ) {
-		certFile = file;
-		certFolder = folder;
-	}
-
-	public function close() : Void {
-		SSL_shutdown( ssl );
-		SSL_close( ssl );
-		SSL_CTX_close( ctx );
-		//SSL_free( ssl ); 
-		socket_close( __s );
-		input.__s = output.__s = null;
-		input.close();
-		output.close();
-	}
-
-	public function read() : String {
-		var b = socket_read( ssl );
-		if( b == null )
-			return "";
-		return b.toString();
-	}
-
-	public function write( content : String ) {
-		socket_write( ssl, content );
-	}
-
 	public function connect(host : Host, port : Int) : Void {
 		try {
-			socket_connect(__s, host.ip, port );
+			socket_connect( __s, host.ip, port );
 			ctx = buildSSLContext();
 			ssl = SSL_new( ctx );
 			input.ssl = ssl;
@@ -174,6 +151,7 @@ class Socket {
 			var sbio = BIO_new_socket( __s, BIO_NOCLOSE() );
 			SSL_set_bio( ssl, sbio, sbio );
 			var r : Int = SSL_connect( ssl );
+			//connected = true;
 		} catch( s : String ) {
 			if( s == "std@socket_connect" )
 				throw "Failed to connect on "+(try host.reverse() catch(e:Dynamic) host.toString())+":"+port;
@@ -184,25 +162,80 @@ class Socket {
 		}
 	}
 
+	/**
+		Set paths to cert locations
+	*/
+	public function setCertLocation( file : String, folder : String ) {
+		certFile = file;
+		certFolder = folder;
+	}
+
+	//TODO
+	//public function setSecure() {}
+
+	public function read() : String {
+		trace("read");
+		var b = socket_read( ssl );
+		if( b == null )
+			return "";
+		trace("reat");
+		return b.toString();
+	}
+
+	public function write( content : String ) {
+		#if cpp
+		socket_write( ssl, content );
+		#elseif neko
+		socket_write( ssl, untyped content.__s );
+		#end
+	}
+
+	public function close() : Void {
+//		SSL_shutdown( ssl );
+		SSL_close( ssl );
+		SSL_CTX_close( ctx );
+		//SSL_free( ssl ); 
+		socket_close( __s );
+		input.__s = output.__s = null;
+		input.ssl = output.ssl = null;
+		input.close();
+		output.close();
+	}
+
+	/*
+	public function bind( host : Host, port : Int ) : Void {
+		
+		//TODO
+		
+		trace("bind");
+		
+		ctx = SSL_CTX_new( SSLv23_client_method() );
+		SSL_CTX_use_certificate_file( ctx, "server.crt", "server.key" );
+		
+		ssl = SSL_new( ctx );
+		input.ssl = ssl;
+		output.ssl = ssl;
+		var bio = BIO_new_socket( __s, BIO_NOCLOSE() );
+		SSL_set_bio( ssl, bio, bio );
+		socket_bind( __s, host.ip, port );
+	}
+
 	public function listen( connections : Int ) : Void {
 		socket_listen( __s, connections );
-	}
-
-	public function shutdown( read : Bool, write : Bool ) : Void {
-		SSL_shutdown( ssl );
-		socket_shutdown( __s, read, write );
-	}
-
-	public function bind(host : Host, port : Int) : Void {
-		socket_bind(__s, host.ip, port);
+		//socket_listen( __s, ssl, connections );
 	}
 
 	public function accept() : Socket {
+		trace("accept");
 		var c = socket_accept( __s );
-		var s = Type.createEmptyInstance( Socket );
+		var s = Type.createEmptyInstance( sys.ssl.Socket );
 		s.__s = c;
+		//s.ssl = ssl;
+		ssl_accept( ssl );
 		s.input = new SocketInput(c);
+		s.input.ssl = ssl;
 		s.output = new SocketOutput(c);
+		s.output.ssl = ssl;
 		return s;
 	}
 
@@ -212,10 +245,16 @@ class Socket {
 		untyped h.ip = a[0];
 		return { host : h, port : a[1] };
 	}
+	*/
+
+	public function shutdown( read : Bool, write : Bool ) : Void {
+		SSL_shutdown( ssl );
+		socket_shutdown( __s, read, write );
+	}
 
 	public function host() : { host : Host, port : Int } {
-		var a : Dynamic = socket_host(__s);
-		var h = new Host("127.0.0.1");
+		var a : Dynamic = socket_host( __s );
+		var h = new Host( "127.0.0.1" );
 		untyped h.ip = a[0];
 		return { host : h, port : a[1] };
 	}
@@ -253,7 +292,7 @@ class Socket {
 		return ctx;
 	}
 
-	public static function select(read : Array<Socket>, write : Array<Socket>, others : Array<Socket>, ?timeout : Float ) : {read: Array<Socket>,write: Array<Socket>,others: Array<Socket>} {
+	public static function select( read : Array<Socket>, write : Array<Socket>, others : Array<Socket>, ?timeout : Float ) : { read: Array<Socket>, write: Array<Socket>, others: Array<Socket> } {
 		var neko_array = socket_select( read, write, others, timeout );
 		if( neko_array == null )
 			throw "Select error";
@@ -264,24 +303,33 @@ class Socket {
 		};
 	}
 
-	private static var SSL_library_init = lib( 'SSL_library_init' );
-	private static var SSL_load_error_strings = lib( 'SSL_load_error_strings' );
+	private static var SSL_library_init = lib( "SSL_library_init" );
+	private static var SSL_load_error_strings = lib( "SSL_load_error_strings" );
+
 	private static var SSL_new = lib( "SSL_new", 1 );
 	private static var SSL_close = lib( "SSL_close", 1 );
-	private static var SSL_set_bio = lib( "SSL_set_bio", 3 );
 	private static var SSL_connect = lib( "SSL_connect", 1 );
 	private static var SSL_shutdown = lib( "SSL_shutdown", 1 );
 	private static var SSL_free = lib( "SSL_free", 1 );
+
+	private static var SSL_set_bio = lib( "SSL_set_bio", 3 );
+	
 	private static var SSLv23_client_method = lib( 'SSLv23_client_method' );
 	private static var TLSv1_client_method = lib( 'TLSv1_client_method' );
+	
 	private static var SSL_CTX_new = lib( 'SSL_CTX_new', 1 );
 	private static var SSL_CTX_close = lib( 'SSL_CTX_close', 1 );
 	private static var SSL_CTX_load_verify_locations = lib( 'SSL_CTX_load_verify_locations', 3 );
 	private static var SSL_CTX_set_verify = lib( 'SSL_CTX_set_verify', 1 );
+	private static var SSL_CTX_use_certificate_file = lib( 'SSL_CTX_use_certificate_file', 3 );
+	
 	private static var BIO_new_socket = lib( "BIO_new_socket", 2 );
 	private static var BIO_NOCLOSE = lib( "BIO_NOCLOSE", 0 );
-	private static var socket_write = lib( '__SSL_write', 2 );
+	
 	private static var socket_read = lib( '__SSL_read', 1 );
+	private static var socket_write = lib( '__SSL_write', 2 );
+	//private static var socket_listen = lib( '__SSL_listen', 3 );
+	private static var ssl_accept = lib( '__SSL_accept', 1 );
 
 	private static inline function lib( f : String, args : Int = 0 ) : Dynamic {
 		return Lib.load( 'ssl', 'hxssl_'+f, args );

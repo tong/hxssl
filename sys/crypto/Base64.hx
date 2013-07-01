@@ -16,6 +16,8 @@ class Base64 {
 		return _encode( s );
 		#elseif neko
 		return Lib.nekoToHaxe( _encode( Lib.haxeToNeko(s) ) );
+		#elseif php
+		return untyped __call__( "base64_encode", s );
 		#end
 	}
 	
@@ -24,10 +26,14 @@ class Base64 {
 		return _decode( s );
 		#elseif neko
 		return Lib.nekoToHaxe( _decode( Lib.haxeToNeko(s) ) );
+		#elseif php
+		return untyped __call__( "base64_decode", s );
 		#end
 	}
 	
-	private static inline function _encode( s : String ) { return Lib.load( "ssl", "hxssl_base64_encode", 1 )(s); }
-	private static inline function _decode( s : String ) { return Lib.load( "ssl", "hxssl_base64_decode", 1 )(s); }
+	#if (cpp||neko)
+	private static inline function _encode( s : String ) return Lib.load( "ssl", "hxssl_base64_encode", 1 )(s);
+	private static inline function _decode( s : String ) return Lib.load( "ssl", "hxssl_base64_decode", 1 )(s);
+	#end
 	
 }

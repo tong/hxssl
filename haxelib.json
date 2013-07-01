@@ -2,7 +2,7 @@
 	"name" : "ssl",
 	"url" : "https://github.com/tong/hxssl",
 	"license" : "Public",
-	"tags" : ["ssl","openssl","secure","crypto","https","tls","socket","hash","base64","md5"],
+	"tags" : ["ssl","openssl","secure","encryption","crypto","https","tls","socket","hash","base64","md5"],
 	"description" : "Cpp/Neko OpenSSL bindings",
 	"version" : "3.0.0",
 	"releasenote": "Initial haxe3 release",

@@ -1,6 +1,6 @@
 
 -lib ssl
--dce full
 -main Run
 -cpp cpp
+-dce full
 -cmd cp cpp/Run ./test

@@ -5,3 +5,6 @@ _*
 .zip
 *.n
 */cpp/*
+*.crt
+*.csr
+*.key

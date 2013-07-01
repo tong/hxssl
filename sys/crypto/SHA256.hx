@@ -20,6 +20,6 @@ class SHA256 {
 		#end
 	}
 	
-	static inline function _sha256( s : String ) { return Lib.load( "ssl", "hxssl_sha256", 1 )(s); }
+	static inline function _sha256( s : String ) return Lib.load( "ssl", "hxssl_sha256", 1 )(s);
 	
 }

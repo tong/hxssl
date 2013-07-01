@@ -19,7 +19,7 @@ class MD5 {
 		return _md5( s, raw );
 		#elseif neko
 		return Lib.nekoToHaxe( _md5( Lib.haxeToNeko(s), raw ) );
-		#eiseif php
+		#elseif php
 		return untyped __call__( "md5", s, raw );
 		#end
 	}
