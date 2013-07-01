@@ -18,9 +18,11 @@ class SHA1 {
 		return _sha1( s );
 		#elseif neko
 		return Lib.nekoToHaxe( _sha1( Lib.haxeToNeko(s) ) );
+		#elseif php
+		return untyped __call__( "sha1", s );
 		#end
 	}
 	
-	static inline function _sha1( s : String ) { return Lib.load( "ssl", "hxssl_sha1", 1 )(s); }
+	static inline function _sha1( s : String ) return Lib.load( "ssl", "hxssl_sha1", 1 )(s);
 	
 }
