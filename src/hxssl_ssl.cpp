@@ -4,14 +4,18 @@
 
 #include <hx/CFFI.h>
 #include <stdio.h>
+
+#if !_MSC_VER
 #include <sys/socket.h>
+#endif
+
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 
-
-
+#if !_MSC_VER
 typedef int SOCKET;
+#endif
 
 #define SOCKET_ERROR (-1)
 #define val_ssl(o)	(SSL*)val_data(o)
@@ -25,6 +29,7 @@ DEFINE_KIND( k_ssl_ctx_pointer );
 DEFINE_KIND( k_ssl_ctx );
 DEFINE_KIND( k_BIO );
 
+#if !_MSC_VER
 typedef struct {
 	//SOCKET sock;
 	SSL *ssl;
@@ -32,7 +37,7 @@ typedef struct {
 	int size;
 	int ret;
 } sock_tmp;
-
+#endif
 
 static value block_error() {
 	#ifdef NEKO_WINDOWS

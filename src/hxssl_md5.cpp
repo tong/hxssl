@@ -1,4 +1,9 @@
 
+#define _CRT_SECURE_NO_WARNINGS
+#if _MSC_VER
+#define snprintf _snprintf
+#endif
+
 #include <hx/CFFI.h>
 #include <string.h>
 #include <openssl/md5.h>

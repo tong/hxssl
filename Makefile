@@ -31,6 +31,10 @@ else ifeq ($(OS),Darwin)
 	else ifeq ($(MACHINE),i686)
 		OS=Mac
 	endif
+else ifeq ($(OS),Windows_NT)
+	OS=Windows
+	NDLL_FLAGS+=-DWindows
+	HXCPP_FLAGS+=-D Windows
 endif
 
 ifeq ($(DEBUG),true)
