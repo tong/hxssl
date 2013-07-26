@@ -19,13 +19,15 @@
 	</files>
 
 	<target id="ssl.ndll" tool="linker" toolid="dll" output="ssl">
+		
 		<ext value=".ndll"/>
 		<outdir name="../ndll/${BINDIR}"/>
 		<flag value="${LIB_DIR}"/>
 		<files id="files"/>
+		
 		<lib name="-lssl"/>
 		<lib name="-lcrypto"/>
-		
+
 		<lib name="libeay32MT.lib" if="windows" />
 		<lib name="ssleay32MT.lib" if="windows" />
 		<lib name="Ws2_32.lib" if="windows" />
