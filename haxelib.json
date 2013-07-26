@@ -4,7 +4,8 @@
 	"license" : "Public",
 	"tags" : ["ssl","openssl","secure","encryption","crypto","https","tls","socket","hash","base64","md5"],
 	"description" : "Cpp/Neko OpenSSL bindings",
-	"version" : "3.0.0",
+	"version" : "3.0.0-alpha",
 	"releasenote": "Initial haxe3 release",
 	"contributors": ["tong"]
 }
+

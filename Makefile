@@ -57,7 +57,7 @@ ndll: $(NDLL)
 
 examples: $(SRC)
 	@(cd examples/01-*/;haxe build.hxml $(HXCPP_FLAGS))
-	@(cd examples/02-*/;haxe build.hxml $(HXCPP_FLAGS))
+	#@(cd examples/02-*/;haxe build.hxml $(HXCPP_FLAGS))
 	@(cd examples/03-*/;haxe build.hxml $(HXCPP_FLAGS))
 
 test-cpp: $(HX_SRC) test/*.hx*
