@@ -23,6 +23,6 @@ class SHA1 {
 		#end
 	}
 	
-	static inline function _sha1( s : String ) return Lib.load( "ssl", "hxssl_sha1", 1 )(s);
+	static inline function _sha1( s : String ) return Lib.load( "hxssl", "hxssl_sha1", 1 )(s);
 	
 }

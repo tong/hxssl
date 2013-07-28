@@ -18,7 +18,7 @@
 		<file name="hxssl_ripemd.cpp"/>
 	</files>
 
-	<target id="ssl.ndll" tool="linker" toolid="dll" output="ssl">
+	<target id="hxssl.ndll" tool="linker" toolid="dll" output="hxssl">
 		
 		<ext value=".ndll"/>
 		<outdir name="../ndll/${BINDIR}"/>
@@ -38,7 +38,7 @@
 	</target>
 
 	<target id="default">
-		<target id="ssl.ndll"/>
+		<target id="hxssl.ndll"/>
 	</target>
 
 </xml>

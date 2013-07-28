@@ -2,7 +2,7 @@
 class TestHttps {
 	
 	static function main() {
-		var r = new sys.Http('https://thepiratebay.sx/');
+		var r = new haxe.Http('https://thepiratebay.sx/');
 		r.certFolder = '/etc/ssl/certs';
 		r.certFile = '/etc/ssl/certs/ca-certificates.crt';
 		r.onData = function(data){

@@ -24,6 +24,6 @@ class MD5 {
 		#end
 	}
 	
-	static inline function _md5( s : String, raw : Bool ) return Lib.load( "ssl", "hxssl_md5", 2 )(s,raw);
+	static inline function _md5( s : String, raw : Bool ) return Lib.load( "hxssl", "hxssl_md5", 2 )(s,raw);
 	
 }

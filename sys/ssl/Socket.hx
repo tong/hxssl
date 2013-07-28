@@ -64,8 +64,8 @@ private class SocketInput extends haxe.io.Input {
 		if( __s != null ) socket_close( __s );
 	}
 
-	private static var socket_recv = Lib.load( "ssl", "hxssl_SSL_recv", 4 );
-	private static var socket_recv_char = Lib.load( "ssl", "hxssl_SSL_recv_char", 1 );
+	private static var socket_recv = Lib.load( "hxssl", "hxssl_SSL_recv", 4 );
+	private static var socket_recv_char = Lib.load( "hxssl", "hxssl_SSL_recv_char", 1 );
 	private static var socket_close = Lib.load( "std", "socket_close", 1 );
 
 }
@@ -109,8 +109,8 @@ private class SocketOutput extends haxe.io.Output {
 	}
 
 	private static var socket_close = Lib.load( "std", "socket_close", 1 );
-	private static var socket_send_char = Lib.load( "ssl", "hxssl_SSL_send_char", 2 );
-	private static var socket_send = Lib.load( "ssl", "hxssl_SSL_send", 4 );
+	private static var socket_send_char = Lib.load( "hxssl", "hxssl_SSL_send_char", 2 );
+	private static var socket_send = Lib.load( "hxssl", "hxssl_SSL_send", 4 );
 
 }
 
@@ -332,7 +332,7 @@ class Socket {
 	private static var ssl_accept = lib( '__SSL_accept', 1 );
 
 	private static inline function lib( f : String, args : Int = 0 ) : Dynamic {
-		return Lib.load( 'ssl', 'hxssl_'+f, args );
+		return Lib.load( 'hxssl', 'hxssl_'+f, args );
 	}
 
 	private static var socket_new = Lib.load("std","socket_new",1);

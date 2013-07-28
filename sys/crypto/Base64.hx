@@ -32,8 +32,8 @@ class Base64 {
 	}
 	
 	#if (cpp||neko)
-	private static inline function _encode( s : String ) return Lib.load( "ssl", "hxssl_base64_encode", 1 )(s);
-	private static inline function _decode( s : String ) return Lib.load( "ssl", "hxssl_base64_decode", 1 )(s);
+	private static inline function _encode( s : String ) return Lib.load( "hxssl", "hxssl_base64_encode", 1 )(s);
+	private static inline function _decode( s : String ) return Lib.load( "hxssl", "hxssl_base64_decode", 1 )(s);
 	#end
 	
 }

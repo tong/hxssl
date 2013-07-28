@@ -21,6 +21,6 @@ class RIPEMD160 {
 		#end
 	}
 	
-	static inline function _ripemd160( s : String ) { return Lib.load( "ssl", "hxssl_ripemd160", 1 )(s); }
+	static inline function _ripemd160( s : String ) { return Lib.load( "hxssl", "hxssl_ripemd160", 1 )(s); }
 	
 }

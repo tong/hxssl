@@ -19,7 +19,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package sys;
+package haxe;
 
 #if sys
 
@@ -33,7 +33,7 @@ private typedef AbstractSocket = {
 	function write( str : String ) : Void;
 	function close() : Void;
 	function shutdown( read : Bool, write : Bool ) : Void;
-	#if ssl
+	#if hxssl
 	function setCertLocation( file : String, folder : String ) : Void;
 	#end
 }
@@ -76,7 +76,7 @@ class Http {
 	public static var PROXY : { host : String, port : Int, auth : { user : String, pass : String } } = null;
 	#end
 
-#if ssl
+#if hxssl
 	public var certFile : String;
 	public var certFolder : String;
 #end
@@ -359,14 +359,14 @@ class Http {
 			if( secure ) {
 				#if php
 				sock = new php.net.SslSocket();
-				#elseif ssl
+				#elseif hxssl
 				sock = new sys.ssl.Socket();
 				sock.setCertLocation( certFile, certFolder );
 				#else
 				throw "Https is only supported with -lib ssl";
 				#end
 			} else {
-				#if ssl
+				#if hxssl
 				sock = new sys.ssl.Socket();
 				#else
 				sock = new sys.net.Socket();
