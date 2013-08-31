@@ -14,7 +14,8 @@ class MD5 {
 	public static inline var DIGEST_LENGTH = 16;
 	
 	public static inline function encode( s : String, raw : Bool = false ) : String {
-		//if( raw ) trace( "MD5 raw encoding not implemented" );
+		if( raw )
+			throw( "MD5 raw encoding not implemented" );
 		#if cpp
 		return _md5( s, raw );
 		#elseif neko

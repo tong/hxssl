@@ -22,6 +22,7 @@ typedef int SOCKET;
 
 #define val_ssl(o)	(SSL*)val_data(o)
 #define val_ctx(o)	(SSL_CTX*)val_data(o)
+//#define val_sock(o)	(SSL_CTX*)val_data(o)
 
 DEFINE_KIND( k_ssl_method_pointer );
 DEFINE_KIND( k_ssl_ctx_pointer );
@@ -311,17 +312,15 @@ static value hxssl___SSL_write( value ssl, value data ) {
 	return alloc_null();
 }
 
-/*
 static value hxssl___SSL_listen( value socket, value ssl, value connections ) {
-	printf("Socket.listen not implemented\n");
-	//val_check_kind(o,k_socket);
-	//val_check(n,int);
-	if( listen(val_sock(socket),val_int(connections)) == SOCKET_ERROR )
+	printf( "Socket.listen not implemented!\n" );
+	/*
+	if( listen( val_sock(socket), val_int(connections)) == SOCKET_ERROR )
 		neko_error();
 	return val_true;
-	//return VAL_NULL;
+	*/
+	return val_false;
 }
-*/
 
 static value hxssl___SSL_accept( value ssl ) {
 	//TODO
@@ -366,6 +365,6 @@ DEFINE_PRIM( hxssl_SSL_recv_char, 1 );
 DEFINE_PRIM( hxssl___SSL_read, 1 );
 DEFINE_PRIM( hxssl___SSL_write, 2 );
 
-//TODO socket.listen
+//TODO
 //DEFINE_PRIM( hxssl___SSL_listen, 3 );
 DEFINE_PRIM( hxssl___SSL_accept, 1 );

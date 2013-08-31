@@ -1,5 +1,6 @@
-
+##
 ## hxssl
+##
 
 PROJECT=hxssl
 OS=Linux
@@ -62,13 +63,12 @@ test-cpp: $(SRC_HX) test/*.hx*
 	@(cd test;./test)
 
 test-neko: $(SRC_HX) test/*.hx*
-	@(cd test;haxe build-neko.hxml)
-	@(cd test;neko test.n)
+	@(cd test;haxe build-neko.hxml;neko test.n)
 
 test: test-cpp test-neko
 
 hxssl.zip: clean ndll
-	zip -r $@ ndll/ src/build.xml src/*.cpp examples/ haxe/ sys/ test/ Makefile haxelib.json README.md -x "*.o"
+	zip -r $@ ndll/ src/build.xml src/*.cpp examples/ haxe/ java/ sys/ test/ Makefile haxelib.json README.md -x "*.o"
 
 haxelib: hxssl.zip
 
@@ -86,6 +86,6 @@ clean:
 	rm -rf test/cpp
 	rm -f test/test*
 	rm -f $(PROJECT).zip
-	rm -rf examples/0*-*/cpp && rm -f examples/0*-*/test*
+	cd examples && rm -rf 0*-*/cpp 0*-*/cs 0*-*/java && rm -f 0*-*/test-*
 
 .PHONY: ndll examples test test-cpp test-neko haxelib install uninstall clean

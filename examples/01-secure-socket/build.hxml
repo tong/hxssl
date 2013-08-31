@@ -1,11 +1,18 @@
-
 -main TestSecureSocket
 -lib hxssl
 --each
 
 --next
--neko test.n
+-neko test-securesocket.n
 
 --next
 -cpp cpp
--cmd mv cpp/TestSecureSocket ./test
+-cmd mv cpp/TestSecureSocket ./test-securesocket
+
+#--next
+#-java java
+#-cmd mv java/java.jar ./test-securesocket.jar
+
+#--next
+#-cs cs
+#-cmd mv cpp/bin/cs.exe ./test-securesocket.exe && chmod +x test-securesocket.exe
