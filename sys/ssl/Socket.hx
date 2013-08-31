@@ -2,6 +2,7 @@ package sys.ssl;
 
 #if php
 typedef Socket = php.net.SslSocket;
+
 #else
 import sys.net.Host;
 import haxe.io.Bytes;
@@ -14,7 +15,6 @@ import cpp.Lib;
 import neko.Lib;
 #end
 
-//private enum SocketHandle {}
 private typedef SocketHandle = Dynamic;
 private typedef CTX = Dynamic;
 private typedef SSL = Dynamic;
@@ -64,8 +64,8 @@ private class SocketInput extends haxe.io.Input {
 		if( __s != null ) socket_close( __s );
 	}
 
-	private static var socket_recv = Lib.load( "hxssl", "hxssl_SSL_recv", 4 );
-	private static var socket_recv_char = Lib.load( "hxssl", "hxssl_SSL_recv_char", 1 );
+	private static var socket_recv = Socket.load( "SSL_recv", 4 );
+	private static var socket_recv_char = Socket.load( "SSL_recv_char", 1 );
 	private static var socket_close = Lib.load( "std", "socket_close", 1 );
 
 }
@@ -80,7 +80,7 @@ private class SocketOutput extends haxe.io.Output {
 	}
 
 	public override function writeByte( c : Int ) {
-		if (__s==null)
+		if( __s == null )
 			throw "Invalid handle";
 		try {
 			socket_send_char( ssl, c);
@@ -109,8 +109,8 @@ private class SocketOutput extends haxe.io.Output {
 	}
 
 	private static var socket_close = Lib.load( "std", "socket_close", 1 );
-	private static var socket_send_char = Lib.load( "hxssl", "hxssl_SSL_send_char", 2 );
-	private static var socket_send = Lib.load( "hxssl", "hxssl_SSL_send", 4 );
+	private static var socket_send_char = Socket.load( "SSL_send_char", 2 );
+	private static var socket_send = Socket.load( "SSL_send", 4 );
 
 }
 
@@ -303,37 +303,53 @@ class Socket {
 		};
 	}
 
-	private static var SSL_library_init = lib( "SSL_library_init" );
-	private static var SSL_load_error_strings = lib( "SSL_load_error_strings" );
+	private static var SSL_library_init = load( "SSL_library_init" );
+	private static var SSL_load_error_strings = load( "SSL_load_error_strings" );
 
-	private static var SSL_new = lib( "SSL_new", 1 );
-	private static var SSL_close = lib( "SSL_close", 1 );
-	private static var SSL_connect = lib( "SSL_connect", 1 );
-	private static var SSL_shutdown = lib( "SSL_shutdown", 1 );
-	private static var SSL_free = lib( "SSL_free", 1 );
+	private static var SSL_new = load( "SSL_new", 1 );
+	private static var SSL_close = load( "SSL_close", 1 );
+	private static var SSL_connect = load( "SSL_connect", 1 );
+	private static var SSL_shutdown = load( "SSL_shutdown", 1 );
+	private static var SSL_free = load( "SSL_free", 1 );
 
-	private static var SSL_set_bio = lib( "SSL_set_bio", 3 );
+	private static var SSL_set_bio = load( "SSL_set_bio", 3 );
 	
-	private static var SSLv23_client_method = lib( 'SSLv23_client_method' );
-	private static var TLSv1_client_method = lib( 'TLSv1_client_method' );
+	private static var SSLv23_client_method = load( 'SSLv23_client_method' );
+	private static var TLSv1_client_method = load( 'TLSv1_client_method' );
 	
-	private static var SSL_CTX_new = lib( 'SSL_CTX_new', 1 );
-	private static var SSL_CTX_close = lib( 'SSL_CTX_close', 1 );
-	private static var SSL_CTX_load_verify_locations = lib( 'SSL_CTX_load_verify_locations', 3 );
-	private static var SSL_CTX_set_verify = lib( 'SSL_CTX_set_verify', 1 );
-	private static var SSL_CTX_use_certificate_file = lib( 'SSL_CTX_use_certificate_file', 3 );
+	private static var SSL_CTX_new = load( 'SSL_CTX_new', 1 );
+	private static var SSL_CTX_close = load( 'SSL_CTX_close', 1 );
+	private static var SSL_CTX_load_verify_locations = load( 'SSL_CTX_load_verify_locations', 3 );
+	private static var SSL_CTX_set_verify = load( 'SSL_CTX_set_verify', 1 );
+	private static var SSL_CTX_use_certificate_file = load( 'SSL_CTX_use_certificate_file', 3 );
 	
-	private static var BIO_new_socket = lib( "BIO_new_socket", 2 );
-	private static var BIO_NOCLOSE = lib( "BIO_NOCLOSE", 0 );
+	private static var BIO_new_socket = load( "BIO_new_socket", 2 );
+	private static var BIO_NOCLOSE = load( "BIO_NOCLOSE", 0 );
 	
-	private static var socket_read = lib( '__SSL_read', 1 );
-	private static var socket_write = lib( '__SSL_write', 2 );
+	private static var socket_read = load( '__SSL_read', 1 );
+	private static var socket_write = load( '__SSL_write', 2 );
 	//private static var socket_listen = lib( '__SSL_listen', 3 );
-	private static var ssl_accept = lib( '__SSL_accept', 1 );
-
-	private static inline function lib( f : String, args : Int = 0 ) : Dynamic {
+	private static var ssl_accept = load( '__SSL_accept', 1 );
+	
+	@:allow(sys.ssl)
+	private static function load( f : String, args : Int = 0 ) : Dynamic {
+		#if neko
+		if( !moduleInit ) loadNekoAPI();
+		#end
 		return Lib.load( 'hxssl', 'hxssl_'+f, args );
 	}
+
+	#if neko
+	private static var moduleInit = false;
+	private static function loadNekoAPI() {
+		var init = Lib.load( 'hxssl', 'neko_init', 5 );
+		if( init != null ) {
+			init(function(s) return new String(s), function(len:Int) { var r = []; if (len > 0) r[len - 1] = null; return r; }, null, true, false);
+			moduleInit = true;
+		} else
+			throw 'Could not find nekoapi interface';
+	}
+	#end
 
 	private static var socket_new = Lib.load("std","socket_new",1);
 	private static var socket_close = Lib.load("std","socket_close",1);

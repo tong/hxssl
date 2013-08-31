@@ -18,13 +18,12 @@ typedef int SOCKET;
 #endif
 
 #define SOCKET_ERROR (-1)
-#define val_ssl(o)	(SSL*)val_data(o)
-#define val_ctx(o)	(SSL_CTX*)val_data(o)
-#define VAL_NULL    alloc_int(0) // TODO neko error on val_null ???
-
 #define NRETRYS	20
 
-DEFINE_KIND( k_ssl_method_pointer);
+#define val_ssl(o)	(SSL*)val_data(o)
+#define val_ctx(o)	(SSL_CTX*)val_data(o)
+
+DEFINE_KIND( k_ssl_method_pointer );
 DEFINE_KIND( k_ssl_ctx_pointer );
 DEFINE_KIND( k_ssl_ctx );
 DEFINE_KIND( k_BIO );
@@ -48,22 +47,19 @@ static value block_error() {
 	#endif
 		val_throw(alloc_string("Blocking"));
 	neko_error();
-	return val_true;
+	return alloc_null();
 }
-
-
 
 static value hxssl_SSL_library_init() {
 	SSL_library_init();
 	//OpenSSL_add_all_algorithms(); // required ?
-	return VAL_NULL;
+	return alloc_null();
 }
 
 static value hxssl_SSL_load_error_strings() {
 	SSL_load_error_strings();
-	return VAL_NULL;
+	return alloc_null();
 }
-
 
 static value hxssl_SSL_new( value ctx ) {
 	SSL* ssl = SSL_new( val_ctx(ctx) );
@@ -72,7 +68,7 @@ static value hxssl_SSL_new( value ctx ) {
 
 static value hxssl_SSL_close( value ssl ) {
 	SSL_free( val_ssl(ssl) );
-	return VAL_NULL;
+	return alloc_null();
 }
 
 static value hxssl_SSL_connect( value ssl ) {
@@ -86,15 +82,13 @@ static value hxssl_SSL_shutdown( value ssl ) {
 
 static value hxssl_SSL_free( value ssl ) {
 	SSL_free( val_ssl(ssl) );
-	return VAL_NULL;
+	return alloc_null();
 }
-
 
 static value hxssl_SSL_set_bio( value ssl, value rbio, value wbio ) {
 	SSL_set_bio( val_ssl(ssl), (BIO*) val_data(rbio), (BIO*) val_data(wbio) );
-	return VAL_NULL;
+	return alloc_null();
 }
-
 
 static value hxssl_SSLv23_client_method() {
 	return alloc_abstract( k_ssl_method_pointer, (SSL_METHOD*)SSLv23_client_method() );
@@ -103,14 +97,13 @@ static value hxssl_TLSv1_client_method() {
 	return alloc_abstract( k_ssl_method_pointer, (SSL_METHOD*)TLSv1_client_method() );
 }
 
-
 static value hxssl_SSL_CTX_new( value m ) {
 	SSL_CTX * ctx = SSL_CTX_new( (SSL_METHOD*) val_data(m) );
 	return alloc_abstract( k_ssl_ctx_pointer, ctx );
 }
 static value hxssl_SSL_CTX_close( value ctx ) {
 	SSL_CTX_free( val_ctx(ctx) );
-	return VAL_NULL;
+	return alloc_null();
 }
 
 static value hxssl_SSL_CTX_load_verify_locations( value ctx, value certFile, value certFolder ) {
@@ -147,7 +140,7 @@ static value hxssl_SSL_CTX_set_verify( value ctx ) {
 	//SSL_CTX_set_verify_depth( _ctx, 1 );
 	SSL_CTX_set_verify( _ctx, SSL_VERIFY_PEER, NULL );
 	//SSL_CTX_set_verify( _ctx, SSL_VERIFY_PEER, verify_callback );
-	return VAL_NULL;
+	return alloc_null();
 }
 
 static value hxssl_SSL_CTX_use_certificate_file( value ctx, value certFile, value privateKeyFile ) {
@@ -158,9 +151,8 @@ static value hxssl_SSL_CTX_use_certificate_file( value ctx, value certFile, valu
 	if( !SSL_CTX_check_private_key(_ctx) ) {
  		neko_error();
 	}
-	return VAL_NULL;
+	return alloc_null();
 }
-
 
 static value hxssl_BIO_NOCLOSE() {
 	return alloc_int( BIO_NOCLOSE );
@@ -171,7 +163,6 @@ static value hxssl_BIO_new_socket( value sock, value close_flag ) {
 	BIO* bio = BIO_new_socket( sock_, val_int(close_flag) );
 	return alloc_abstract( k_BIO, bio );
 }
-
 
 static value hxssl_SSL_send_char( value ssl, value v ) {
 	int c = val_int(v);
@@ -317,7 +308,7 @@ static value hxssl___SSL_write( value ssl, value data ) {
 		s += slen;
 		len -= slen;
 	}
-	return VAL_NULL;
+	return alloc_null();
 }
 
 /*
@@ -340,9 +331,8 @@ static value hxssl___SSL_accept( value ssl ) {
 	SSL_set_fd( _ssl, client );
 	SSL_accept( _ssl );      
 	printf("Socket.accept\n");
-	return VAL_NULL;
+	return alloc_null();
 }
-
 
 
 DEFINE_PRIM( hxssl_SSL_library_init, 0 );
