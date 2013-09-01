@@ -3,6 +3,12 @@ package sys.ssl;
 #if php
 typedef Socket = php.net.SslSocket;
 
+#elseif cs
+typedef Socket = sys.net.Socket; //TODO
+
+#elseif java
+typedef Socket = sys.net.Socket; //TODO
+
 #else
 import sys.net.Host;
 import haxe.io.Bytes;

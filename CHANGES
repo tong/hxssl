@@ -1,7 +1,10 @@
 
-# hxssl
+## hxssl
 
-3.0:
+-3.0.0-alpha.2:
+	fixed nekoapi initialization
+
+3.0.0-alpha:
 	haxe 3 support
 	hxcpp support
 	hxcpp buildchain

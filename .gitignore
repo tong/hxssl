@@ -8,3 +8,4 @@ _*
 *.crt
 *.csr
 *.key
+*/all_objs
