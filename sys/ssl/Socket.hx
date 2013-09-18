@@ -136,13 +136,12 @@ class Socket {
 	private var __s : Dynamic;
 	private var ctx : CTX;
 	private var ssl : SSL;
-	private var certFile : String;
-	private var certFolder : String;
 
 	public function new() {
 		//connected = secure = false;
 		initSSL();
 		__s = socket_new( false );
+		ctx = SSL_CTX_new( SSLv23_client_method() );
 		input = new SocketInput( __s );
 		output = new SocketOutput( __s );
 	}
@@ -150,7 +149,6 @@ class Socket {
 	public function connect(host : Host, port : Int) : Void {
 		try {
 			socket_connect( __s, host.ip, port );
-			ctx = buildSSLContext();
 			ssl = SSL_new( ctx );
 			input.ssl = ssl;
 			output.ssl = ssl;
@@ -172,8 +170,16 @@ class Socket {
 		Set paths to cert locations
 	*/
 	public function setCertLocation( file : String, folder : String ) {
-		certFile = file;
-		certFolder = folder;
+		var r : Int = SSL_CTX_load_verify_locations( ctx, file, folder );
+		if( r == 0 )
+			throw "Failed to load certificates";
+		SSL_CTX_set_verify( ctx );
+	}
+
+	public function useCertificate( cert : String, key : String ){
+		var r : Int = SSL_CTX_use_certificate_file( ctx, cert, key );
+		if( r == 0 )
+			throw "Failed to use certificate";
 	}
 
 	//TODO
@@ -284,18 +290,6 @@ class Socket {
 	private function initSSL() {
 		SSL_library_init();
 		SSL_load_error_strings();
-	}
-
-	private function buildSSLContext() : CTX {
-		var ctx : CTX = SSL_CTX_new( SSLv23_client_method() );
-		//if( validateCert ) {
-		if( certFile != null && certFolder != null ) {
-			var r : Int = SSL_CTX_load_verify_locations( ctx, certFile, certFolder );
-			if( r == 0 )
-				throw "Failed to load certificates";
-			SSL_CTX_set_verify( ctx );
-		}
-		return ctx;
 	}
 
 	public static function select( read : Array<Socket>, write : Array<Socket>, others : Array<Socket>, ?timeout : Float ) : { read: Array<Socket>, write: Array<Socket>, others: Array<Socket> } {
