@@ -1,12 +1,11 @@
 package sys.crypto;
 
-#if cpp
-import cpp.Lib;
-#else
-import neko.Lib;
-#end
+import #if cpp cpp.Lib #elseif neko neko.Lib #end;
 
 /**
+	SHA-256
+
+	Cryptographic hash function designed by the U.S. National Security Agency (NSA)
 */
 class SHA256 {
 
