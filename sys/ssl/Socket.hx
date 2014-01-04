@@ -1,14 +1,11 @@
 package sys.ssl;
 
 #if php
-typedef Socket = php.net.SslSocket;
-
+import php.net.SslSocket in Socket;
 #elseif cs
 typedef Socket = sys.net.Socket; //TODO
-
 #elseif java
 typedef Socket = sys.net.Socket; //TODO
-
 #else
 import sys.net.Host;
 import haxe.io.Bytes;
@@ -373,4 +370,4 @@ class Socket {
 
 }
 
-#end //!php
+#end
