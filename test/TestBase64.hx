@@ -60,6 +60,8 @@ class TestBase64 extends haxe.unit.TestCase {
 		assertEquals( "foo", Base64.decode( Base64.encode( "foo" ) ) );
 		assertEquals( "fo", Base64.decode( Base64.encode( "fo" ) ) );
 		assertEquals( "f", Base64.decode( Base64.encode( "f" ) ) );
+		var s = "Man is distinguished, not only by his reason, but by this singular passion from other animals, which is a lust of the mind, that by a perseverance of delight in the continued and indefatigable generation of knowledge, exceeds the short vehemence of any carnal pleasure.";
+		assertEquals( s, Base64.decode( StringTools.replace( Base64.encode(s), "\n", "" ) ) );
 	}
 	
 }
