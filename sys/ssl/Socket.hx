@@ -167,7 +167,10 @@ class Socket {
 	}
 
 	/**
-		Set paths to cert locations
+		Set custom paths to cert locations.
+		
+		This should only be used if you know what you are doing.
+		By default certficate locations are automatically detected.
 	*/
 	public function setCertLocation( file : String, folder : String ) {
 		certFile = file;
