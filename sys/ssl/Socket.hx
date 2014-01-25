@@ -126,7 +126,7 @@ class Socket {
 	public var input(default,null) : SocketInput;
 	public var output(default,null) : SocketOutput;
 	public var custom : Dynamic;
-	//public var validateCert : Bool;
+	public var validateCert : Bool;
 	//public var connected : Bool;
 	//public var secure : Bool;
 	
@@ -142,6 +142,7 @@ class Socket {
 		__s = socket_new( false );
 		input = new SocketInput( __s );
 		output = new SocketOutput( __s );
+		validateCert = true;
 	}
 
 	public function connect(host : Host, port : Int) : Void {
@@ -285,11 +286,12 @@ class Socket {
 
 	private function buildSSLContext() : CTX {
 		var ctx : CTX = SSL_CTX_new( SSLv23_client_method() );
-		//if( validateCert ) {
-		var r : Int = SSL_CTX_load_verify_locations( ctx, certFile, certFolder );
-		if( r == 0 )
-			throw "Failed to load certificates";
-		SSL_CTX_set_verify( ctx );
+		if( validateCert ) {
+			var r : Int = SSL_CTX_load_verify_locations( ctx, certFile, certFolder );
+			if( r == 0 )
+				throw "Failed to load certificates";
+			SSL_CTX_set_verify( ctx );
+		}
 		return ctx;
 	}
 
