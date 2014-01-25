@@ -108,22 +108,22 @@ static value hxssl_SSL_CTX_close( value ctx ) {
 }
 
 static value hxssl_SSL_CTX_load_verify_locations( value ctx, value certFile, value certFolder ) {
-	const char *sslCertFile;
-	const char *sslCertFolder;
-	if( !val_is_string( certFile ) )
-		sslCertFile = "/etc/ssl/certs/ca-certificates.crt"; //TODO
-	else
-		sslCertFile = val_string( certFile );
-	if( !val_is_string( certFolder ) )
-		sslCertFolder = "/etc/ssl/certs"; //TODO
-	else
-		sslCertFolder = val_string( certFolder );
-	//printf( "SSL cert file: %s\n", sslCertFile );
-	//printf( "SSL cert folder: %s\n", sslCertFolder );
-	int r = SSL_CTX_load_verify_locations( val_ctx(ctx), sslCertFile, sslCertFolder );
-	//printf( "Cert verfification result: %i\n", r );
-	return alloc_int( r );
+        const char *sslCertFile;
+        const char *sslCertFolder;
+        int r;
+        if( val_is_string( certFile ) && val_is_string( certFolder ) ) {
+                sslCertFile = val_string( certFile );
+                sslCertFolder = val_string( certFolder );
+                r = SSL_CTX_load_verify_locations( val_ctx(ctx), sslCertFile, sslCertFolder );
+        } else {
+                r = SSL_CTX_set_default_verify_paths( val_ctx(ctx) );
+        }
+        //printf( "SSL cert file: %s\n", sslCertFile );
+        //printf( "SSL cert folder: %s\n", sslCertFolder );
+        //printf( "Cert verfification result: %i\n", r );
+        return alloc_int( r );
 }
+
 
 //TODO Verify callback
 // http://linux.die.net/man/3/ssl_ctx_set_verify_depth

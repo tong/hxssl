@@ -286,12 +286,10 @@ class Socket {
 	private function buildSSLContext() : CTX {
 		var ctx : CTX = SSL_CTX_new( SSLv23_client_method() );
 		//if( validateCert ) {
-		if( certFile != null && certFolder != null ) {
-			var r : Int = SSL_CTX_load_verify_locations( ctx, certFile, certFolder );
-			if( r == 0 )
-				throw "Failed to load certificates";
-			SSL_CTX_set_verify( ctx );
-		}
+		var r : Int = SSL_CTX_load_verify_locations( ctx, certFile, certFolder );
+		if( r == 0 )
+			throw "Failed to load certificates";
+		SSL_CTX_set_verify( ctx );
 		return ctx;
 	}
 
