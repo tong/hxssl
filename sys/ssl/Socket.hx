@@ -190,11 +190,7 @@ class Socket {
 	}
 
 	public function write( content : String ) {
-		#if cpp
 		socket_write( ssl, content );
-		#elseif neko
-		socket_write( ssl, untyped content.__s );
-		#end
 	}
 
 	public function close() : Void {
