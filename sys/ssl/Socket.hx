@@ -1,14 +1,11 @@
 package sys.ssl;
 
 #if php
-typedef Socket = php.net.SslSocket;
-
+import php.net.SslSocket in Socket;
 #elseif cs
 typedef Socket = sys.net.Socket; //TODO
-
 #elseif java
 typedef Socket = sys.net.Socket; //TODO
-
 #else
 import sys.net.Host;
 import haxe.io.Bytes;
@@ -142,6 +139,7 @@ class Socket {
 		initSSL();
 		__s = socket_new( false );
 		ctx = SSL_CTX_new( SSLv23_client_method() );
+		setCertLocation();
 		input = new SocketInput( __s );
 		output = new SocketOutput( __s );
 	}
@@ -167,9 +165,12 @@ class Socket {
 	}
 
 	/**
-		Set paths to cert locations
+		Set custom paths to cert locations.
+		
+		This should only be used if you know what you are doing.
+		By default certficate locations are automatically detected.
 	*/
-	public function setCertLocation( file : String, folder : String ) {
+	public function setCertLocation( ?file : String, ?folder : String ) {
 		var r : Int = SSL_CTX_load_verify_locations( ctx, file, folder );
 		if( r == 0 )
 			throw "Failed to load certificates";
@@ -195,11 +196,7 @@ class Socket {
 	}
 
 	public function write( content : String ) {
-		#if cpp
 		socket_write( ssl, content );
-		#elseif neko
-		socket_write( ssl, untyped content.__s );
-		#end
 	}
 
 	public function close() : Void {
@@ -367,4 +364,4 @@ class Socket {
 
 }
 
-#end //!php
+#end

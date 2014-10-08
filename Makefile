@@ -7,7 +7,6 @@ OS=Linux
 DEBUG=false
 NDLL_FLAGS=
 HXCPP_FLAGS=
-
 OS=$(shell sh -c 'uname -s 2>/dev/null || echo not')
 MACHINE=$(shell sh -c 'uname -m 2>/dev/null || echo not')
 
@@ -68,7 +67,7 @@ test-neko: $(SRC_HX) test/*.hx*
 test: test-cpp test-neko
 
 hxssl.zip: clean ndll
-	zip -r $@ ndll/ src/build.xml src/*.cpp examples/ haxe/ java/ sys/ test/ Makefile haxelib.json README.md -x "*.o"
+	zip -r $@ ndll/ src/build.xml src/*.cpp examples/ haxe/ sys/ test/ Makefile haxelib.json README.md -x "*.o"
 
 haxelib: hxssl.zip
 

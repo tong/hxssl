@@ -1,16 +1,14 @@
 
+import Sys.println;
+
 class TestHttps {
+
+	static var URL = "https://thepiratebay.se";
 	
 	static function main() {
-		var r = new haxe.Http('https://thepiratebay.sx/');
-		r.certFolder = '/etc/ssl/certs';
-		r.certFile = '/etc/ssl/certs/ca-certificates.crt';
-		r.onData = function(data){
-			Sys.println( data );
-		};
-		r.onError = function(error){
-			Sys.println( error );
-		};
+		var r = new haxe.Http( URL );
+		r.onData = println;
+		r.onError = println;
 		r.request();
 	}
 }

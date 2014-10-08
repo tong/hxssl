@@ -8,12 +8,6 @@ class TestSecureSocket {
 	static function connectToXMPPServer( ip : String, host : String, port : Int = 5223 ) {
 		Sys.println( 'Connecting to : $ip ...' );
 		var socket = new Socket();
-		switch( Sys.systemName() ) {
-		case 'Linux':
-			socket.setCertLocation( '/etc/ssl/certs/ca-certificates.crt', '/etc/ssl/certs' );
-		default:
-			trace( "???" );
-		}
 		socket.connect( new Host( ip ), port );
 		Sys.println( 'Connected' );
 		Sys.println( 'Writing data to $host : $ip' );
