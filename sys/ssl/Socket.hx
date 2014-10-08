@@ -126,7 +126,7 @@ class Socket {
 	public var input(default,null) : SocketInput;
 	public var output(default,null) : SocketOutput;
 	public var custom : Dynamic;
-	//public var validateCert : Bool;
+	public var validateCert : Bool;
 	//public var connected : Bool;
 	//public var secure : Bool;
 	
@@ -134,19 +134,25 @@ class Socket {
 	private var ctx : CTX;
 	private var ssl : SSL;
 
+	private var verifyCertFile : String;
+	private var verifyCertFolder : String;
+
+	private var useCertFile : String;
+	private var useKeyFile : String;
+
 	public function new() {
 		//connected = secure = false;
 		initSSL();
 		__s = socket_new( false );
-		ctx = SSL_CTX_new( SSLv23_client_method() );
-		setCertLocation();
 		input = new SocketInput( __s );
 		output = new SocketOutput( __s );
+		validateCert = true;
 	}
 
 	public function connect(host : Host, port : Int) : Void {
 		try {
 			socket_connect( __s, host.ip, port );
+			ctx = buildSSLContext();
 			ssl = SSL_new( ctx );
 			input.ssl = ssl;
 			output.ssl = ssl;
@@ -170,17 +176,14 @@ class Socket {
 		This should only be used if you know what you are doing.
 		By default certficate locations are automatically detected.
 	*/
-	public function setCertLocation( ?file : String, ?folder : String ) {
-		var r : Int = SSL_CTX_load_verify_locations( ctx, file, folder );
-		if( r == 0 )
-			throw "Failed to load certificates";
-		SSL_CTX_set_verify( ctx );
+	public function setCertLocation( file : String, folder : String ) {
+		verifyCertFile = file;
+		verifyCertFolder = folder;
 	}
 
-	public function useCertificate( cert : String, key : String ){
-		var r : Int = SSL_CTX_use_certificate_file( ctx, cert, key );
-		if( r == 0 )
-			throw "Failed to use certificate";
+	public function useCertificate( certFile : String, keyFile : String ){
+		useCertFile = certFile;
+		useKeyFile = keyFile;
 	}
 
 	//TODO
@@ -287,6 +290,22 @@ class Socket {
 	private function initSSL() {
 		SSL_library_init();
 		SSL_load_error_strings();
+	}
+
+	private function buildSSLContext() : CTX {
+		var ctx : CTX = SSL_CTX_new( SSLv23_client_method() );
+		if( validateCert ) {
+			var r : Int = SSL_CTX_load_verify_locations( ctx, verifyCertFile, verifyCertFolder );
+			if( r == 0 )
+				throw "Failed to load certificates";
+			SSL_CTX_set_verify( ctx );
+		}
+		if( useCertFile != null ){
+			var r : Int = SSL_CTX_use_certificate_file( ctx, useCertFile, useKeyFile );
+			if( r == 0 )
+				throw "Failed to use certificate";
+		}
+		return ctx;
 	}
 
 	public static function select( read : Array<Socket>, write : Array<Socket>, others : Array<Socket>, ?timeout : Float ) : { read: Array<Socket>, write: Array<Socket>, others: Array<Socket> } {
