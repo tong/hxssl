@@ -214,40 +214,30 @@ class Socket {
 		output.close();
 	}
 
-	/*
 	public function bind( host : Host, port : Int ) : Void {
-		
-		//TODO
-		
-		trace("bind");
-		
-		ctx = SSL_CTX_new( SSLv23_client_method() );
-		SSL_CTX_use_certificate_file( ctx, "server.crt", "server.key" );
-		
-		ssl = SSL_new( ctx );
-		input.ssl = ssl;
-		output.ssl = ssl;
-		var bio = BIO_new_socket( __s, BIO_NOCLOSE() );
-		SSL_set_bio( ssl, bio, bio );
+		ctx = SSL_CTX_new( SSLv23_server_method() );
+		SSL_CTX_use_certificate_file( ctx, useCertFile, useKeyFile );
 		socket_bind( __s, host.ip, port );
 	}
 
 	public function listen( connections : Int ) : Void {
 		socket_listen( __s, connections );
-		//socket_listen( __s, ssl, connections );
 	}
 
 	public function accept() : Socket {
-		trace("accept");
 		var c = socket_accept( __s );
+		var ssl = SSL_new( ctx );
+
 		var s = Type.createEmptyInstance( sys.ssl.Socket );
 		s.__s = c;
-		//s.ssl = ssl;
-		ssl_accept( ssl );
+		s.ssl = ssl;
 		s.input = new SocketInput(c);
 		s.input.ssl = ssl;
 		s.output = new SocketOutput(c);
 		s.output.ssl = ssl;
+
+		SSL_accept( ssl, c );
+
 		return s;
 	}
 
@@ -257,7 +247,6 @@ class Socket {
 		untyped h.ip = a[0];
 		return { host : h, port : a[1] };
 	}
-	*/
 
 	public function shutdown( read : Bool, write : Bool ) : Void {
 		SSL_shutdown( ssl );
@@ -331,7 +320,7 @@ class Socket {
 	private static var SSL_set_bio = load( "SSL_set_bio", 3 );
 	
 	private static var SSLv23_client_method = load( 'SSLv23_client_method' );
-	private static var TLSv1_client_method = load( 'TLSv1_client_method' );
+	private static var SSLv23_server_method = load( 'SSLv23_server_method' );
 	
 	private static var SSL_CTX_new = load( 'SSL_CTX_new', 1 );
 	private static var SSL_CTX_close = load( 'SSL_CTX_close', 1 );
@@ -345,7 +334,7 @@ class Socket {
 	private static var socket_read = load( '__SSL_read', 1 );
 	private static var socket_write = load( '__SSL_write', 2 );
 	//private static var socket_listen = lib( '__SSL_listen', 3 );
-	private static var ssl_accept = load( '__SSL_accept', 1 );
+	private static var SSL_accept = load( '__SSL_accept', 2 );
 	
 	@:allow(sys.ssl)
 	private static function load( f : String, args : Int = 0 ) : Dynamic {

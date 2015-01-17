@@ -98,6 +98,13 @@ static value hxssl_TLSv1_client_method() {
 	return alloc_abstract( k_ssl_method_pointer, (SSL_METHOD*)TLSv1_client_method() );
 }
 
+static value hxssl_SSLv23_server_method() {
+    return alloc_abstract( k_ssl_method_pointer, (SSL_METHOD*)SSLv23_server_method() );
+}
+static value hxssl_TLSv1_server_method() {
+	return alloc_abstract( k_ssl_method_pointer, (SSL_METHOD*)TLSv1_server_method() );
+}
+
 static value hxssl_SSL_CTX_new( value m ) {
 	SSL_CTX * ctx = SSL_CTX_new( (SSL_METHOD*) val_data(m) );
 	return alloc_abstract( k_ssl_ctx_pointer, ctx );
@@ -145,7 +152,6 @@ static value hxssl_SSL_CTX_set_verify( value ctx ) {
 }
 
 static value hxssl_SSL_CTX_use_certificate_file( value ctx, value certFile, value privateKeyFile ) {
-	printf("hxssl_SSL_CTX_use_certificate_file\n");
 	SSL_CTX* _ctx = val_ctx(ctx);
 	SSL_CTX_use_certificate_file( _ctx, val_string(certFile), SSL_FILETYPE_PEM );
 	SSL_CTX_use_PrivateKey_file( _ctx, val_string(privateKeyFile), SSL_FILETYPE_PEM );
@@ -202,12 +208,14 @@ static value hxssl_SSL_recv( value ssl, value data, value pos, value len ) {
 	//printf("hxssl_SSL_recv %i %i\n", p, l );
 	void * buf = (void *) (val_string(data) + p);
 	int dlen = SSL_read( val_ssl(ssl), buf, l );
-	//if( p < 0 || l < 0 || p > dlen || p + l > dlen )
-	//	neko_error();
+	/*
+	// TODO
 	if( dlen == 0 ) {
-		//int err = SSL_get_error( _ssl, dlen );
+		int err = SSL_get_error( val_ssl(ssl), dlen );
+		printf("ssl_error=%i, errno=%i\n",err,errno);
 		neko_error();
 	}
+	*/
 	//if( dlen == SOCKET_ERROR )
 	return alloc_int( dlen );
 
@@ -312,24 +320,13 @@ static value hxssl___SSL_write( value ssl, value data ) {
 	return alloc_null();
 }
 
-static value hxssl___SSL_listen( value socket, value ssl, value connections ) {
-	printf( "Socket.listen not implemented!\n" );
-	/*
-	if( listen( val_sock(socket), val_int(connections)) == SOCKET_ERROR )
-		neko_error();
-	return val_true;
-	*/
-	return val_false;
-}
-
-static value hxssl___SSL_accept( value ssl ) {
-	//TODO
+static value hxssl___SSL_accept( value ssl, value sock ) {
 	SSL* _ssl = val_ssl( ssl );
-	SSL_set_accept_state( _ssl );
-	int client;
-	SSL_set_fd( _ssl, client );
-	SSL_accept( _ssl );      
-	printf("Socket.accept\n");
+	int _sock = ((int_val) val_data(sock) );
+	if( !SSL_set_fd( _ssl, _sock ) )
+	    neko_error();
+	if( SSL_accept( _ssl ) < 0 )
+	    neko_error();
 	return alloc_null();
 }
 
@@ -347,6 +344,8 @@ DEFINE_PRIM( hxssl_SSL_set_bio, 3 );
 
 DEFINE_PRIM( hxssl_SSLv23_client_method, 0 );
 DEFINE_PRIM( hxssl_TLSv1_client_method, 0 );
+DEFINE_PRIM( hxssl_SSLv23_server_method, 0 );
+DEFINE_PRIM( hxssl_TLSv1_server_method, 0 );
 
 DEFINE_PRIM( hxssl_SSL_CTX_new, 1 );
 DEFINE_PRIM( hxssl_SSL_CTX_close, 1 );
@@ -365,6 +364,4 @@ DEFINE_PRIM( hxssl_SSL_recv_char, 1 );
 DEFINE_PRIM( hxssl___SSL_read, 1 );
 DEFINE_PRIM( hxssl___SSL_write, 2 );
 
-//TODO
-//DEFINE_PRIM( hxssl___SSL_listen, 3 );
-DEFINE_PRIM( hxssl___SSL_accept, 1 );
+DEFINE_PRIM( hxssl___SSL_accept, 2 );
