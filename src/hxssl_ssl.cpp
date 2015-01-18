@@ -174,7 +174,7 @@ static HostnameValidationResult hxssl_match_hostname( const ASN1_STRING *asn1, c
 			return MatchNotFound;
 		}
 		pattern_end = strchr(pattern, '.');	
-		if( pattern_end == NULL || strchr(pattern_end+1,'.') == NULL || wildcard > pattern_end || strncasecmp(pattern,"xn--",4) )
+		if( pattern_end == NULL || strchr(pattern_end+1,'.') == NULL || wildcard > pattern_end || strncasecmp(pattern,"xn--",4)==0 )
 			return MatchNotFound;
 		hostname_end = strchr((char *)hostname, '.');
 		if( hostname_end == NULL || strcasecmp(pattern_end, hostname_end) != 0 )
@@ -259,6 +259,11 @@ static value hxssl_validate_hostname( value ssl, value hostname ){
 	}
 
 	neko_error();
+}
+static value hxssl_SSL_set_tlsext_host_name( value ssl, value hostname ){
+	val_check(hostname,string);
+	if( !SSL_set_tlsext_host_name( val_ssl(ssl), val_string(hostname) ) )
+		neko_error();
 }
 
 static value hxssl_SSL_CTX_set_verify( value ctx ) {
@@ -472,6 +477,7 @@ DEFINE_PRIM( hxssl_SSL_CTX_load_verify_locations, 3 );
 DEFINE_PRIM( hxssl_SSL_CTX_set_verify, 1 );
 DEFINE_PRIM( hxssl_SSL_CTX_use_certificate_file, 3 );
 DEFINE_PRIM( hxssl_validate_hostname, 2 );
+DEFINE_PRIM( hxssl_SSL_set_tlsext_host_name, 2 );
 
 DEFINE_PRIM( hxssl_BIO_NOCLOSE, 0 );
 DEFINE_PRIM( hxssl_BIO_new_socket, 2 );

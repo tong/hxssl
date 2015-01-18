@@ -136,6 +136,7 @@ class Socket {
 
 	private var verifyCertFile : String;
 	private var verifyCertFolder : String;
+	private var verifyHostname : String;
 
 	private var useCertFile : String;
 	private var useKeyFile : String;
@@ -158,7 +159,11 @@ class Socket {
 			output.ssl = ssl;
 			var sbio = BIO_new_socket( __s, BIO_NOCLOSE() );
 			SSL_set_bio( ssl, sbio, sbio );
+			if( verifyHostname != null )
+				SSL_set_tlsext_host_name( ssl, untyped verifyHostname.__s );
 			var r : Int = SSL_connect( ssl );
+			if( verifyHostname != null )
+				validate_hostname( ssl, untyped verifyHostname.__s );
 			//connected = true;
 		} catch( s : String ) {
 			if( s == "std@socket_connect" )
@@ -181,8 +186,8 @@ class Socket {
 		verifyCertFolder = folder;
 	}
 
-	public function validateHostname( hostname : String ){
-		validate_hostname( ssl, untyped hostname.__s );
+	public function setHostname( hostname : String ){
+		verifyHostname = hostname;
 	}
 
 	public function useCertificate( certFile : String, keyFile : String ){
@@ -325,7 +330,9 @@ class Socket {
 	
 	private static var SSLv23_client_method = load( 'SSLv23_client_method' );
 	private static var SSLv23_server_method = load( 'SSLv23_server_method' );
+
 	private static var validate_hostname = load( 'validate_hostname', 2 );
+	private static var SSL_set_tlsext_host_name = load( "SSL_set_tlsext_host_name", 2 );
 	
 	private static var SSL_CTX_new = load( 'SSL_CTX_new', 1 );
 	private static var SSL_CTX_close = load( 'SSL_CTX_close', 1 );
