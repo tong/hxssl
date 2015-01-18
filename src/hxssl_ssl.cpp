@@ -12,6 +12,7 @@
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
+#include <openssl/x509v3.h>
 
 #if !_MSC_VER
 typedef int SOCKET;
@@ -38,6 +39,14 @@ typedef struct {
 	int ret;
 } sock_tmp;
 #endif
+
+typedef enum {
+	MatchFound,
+	MatchNotFound,
+	NoSANPresent,
+	MalformedCertificate,
+	Error
+} HostnameValidationResult;
 
 static value block_error() {
 	#ifdef NEKO_WINDOWS
@@ -74,6 +83,8 @@ static value hxssl_SSL_close( value ssl ) {
 
 static value hxssl_SSL_connect( value ssl ) {
 	int r = SSL_connect( val_ssl(ssl) );
+	if( r < 0 )
+		neko_error();
 	return alloc_int( r );
 }
 
@@ -142,6 +153,114 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) {
 	return preverify_ok;
 }
 */
+
+// HostnameValidation based on https://github.com/iSECPartners/ssl-conservatory
+// Wildcard cmp based on libcurl hostcheck
+static HostnameValidationResult hxssl_match_hostname( const ASN1_STRING *asn1, const char *hostname ){	
+	char *pattern, *wildcard, *pattern_end, *hostname_end;
+	int prefixlen, suffixlen;
+	if( asn1 == NULL )
+		return Error;
+
+	pattern = (char *)ASN1_STRING_data((ASN1_STRING *)asn1);
+	
+	if( ASN1_STRING_length(asn1) != strlen(pattern) ){
+		return MalformedCertificate;
+	}else{
+		wildcard = strchr(pattern, '*');
+		if( wildcard == NULL ){
+			if( strcasecmp(pattern, hostname) == 0 )
+				return MatchFound;
+			return MatchNotFound;
+		}
+		pattern_end = strchr(pattern, '.');	
+		if( pattern_end == NULL || strchr(pattern_end+1,'.') == NULL || wildcard > pattern_end || strncasecmp(pattern,"xn--",4) )
+			return MatchNotFound;
+		hostname_end = strchr((char *)hostname, '.');
+		if( hostname_end == NULL || strcasecmp(pattern_end, hostname_end) != 0 )
+			return MatchNotFound;
+		if( hostname_end-hostname < pattern_end-pattern )
+			return MatchNotFound;
+
+		prefixlen = wildcard - pattern;
+		suffixlen = pattern_end - (wildcard+1);
+		if( strncasecmp(pattern, hostname, prefixlen) != 0 )
+			return MatchNotFound;
+		if( strncasecmp(pattern_end-suffixlen, hostname_end-suffixlen, suffixlen) != 0 )
+			return MatchNotFound;
+
+		return MatchFound;
+	}
+	return MatchNotFound;
+}
+
+static HostnameValidationResult hxssl_matches_subject_alternative_name( const X509 *server_cert, const char *hostname ){
+	int i;
+	int nb = -1;
+	HostnameValidationResult r;
+	STACK_OF(GENERAL_NAME) *san_names = NULL;
+
+	san_names = (STACK_OF(GENERAL_NAME) *) X509_get_ext_d2i((X509 *)server_cert, NID_subject_alt_name, NULL, NULL);
+	if( san_names == NULL )
+		return NoSANPresent;
+	nb = sk_GENERAL_NAME_num(san_names);
+
+	for( i=0; i<nb; i++ ){
+		const GENERAL_NAME *cur = sk_GENERAL_NAME_value(san_names, i);
+		if( cur->type == GEN_DNS ){
+			r = hxssl_match_hostname( cur->d.dNSName, hostname );
+			if( r != MatchNotFound )
+				return r;
+		}
+	}
+	sk_GENERAL_NAME_pop_free(san_names, GENERAL_NAME_free);
+	return MatchNotFound;
+}
+
+static HostnameValidationResult hxssl_matches_common_name(const X509 *server_cert, const char *hostname ){
+	int cn_loc = -1;
+	X509_NAME_ENTRY *cn_entry = NULL;
+
+	
+	cn_loc = X509_NAME_get_index_by_NID(X509_get_subject_name((X509 *)server_cert), NID_commonName, -1);
+	if( cn_loc < 0 )
+		return Error;
+
+	cn_entry = X509_NAME_get_entry(X509_get_subject_name((X509 *)server_cert), cn_loc);
+	if( cn_entry == NULL )
+		return Error;
+
+	return hxssl_match_hostname(X509_NAME_ENTRY_get_data(cn_entry), hostname);
+}
+
+static value hxssl_validate_hostname( value ssl, value hostname ){
+	val_check(hostname,string);
+	const char *name = val_string(hostname);
+	X509 *server_cert = SSL_get_peer_certificate(val_ssl(ssl));
+	HostnameValidationResult result;
+
+	if( server_cert == NULL )
+		neko_error();
+
+	result = hxssl_matches_subject_alternative_name(server_cert, name);
+	if (result == NoSANPresent) 
+		result = hxssl_matches_common_name(server_cert, name);
+	
+	if( result == MatchFound )
+		return alloc_null();
+
+	switch( result ){
+		case MatchNotFound:
+			val_throw(alloc_string("MatchNotFound"));
+			break;
+		case MalformedCertificate:
+			val_throw(alloc_string("MalformedCertificate"));
+			break;
+	}
+
+	neko_error();
+}
+
 static value hxssl_SSL_CTX_set_verify( value ctx ) {
 	SSL_CTX* _ctx = val_ctx(ctx);
 	//SSL_CTX_set_verify_depth( _ctx, val_int(depth) );
@@ -352,6 +471,7 @@ DEFINE_PRIM( hxssl_SSL_CTX_close, 1 );
 DEFINE_PRIM( hxssl_SSL_CTX_load_verify_locations, 3 );
 DEFINE_PRIM( hxssl_SSL_CTX_set_verify, 1 );
 DEFINE_PRIM( hxssl_SSL_CTX_use_certificate_file, 3 );
+DEFINE_PRIM( hxssl_validate_hostname, 2 );
 
 DEFINE_PRIM( hxssl_BIO_NOCLOSE, 0 );
 DEFINE_PRIM( hxssl_BIO_new_socket, 2 );

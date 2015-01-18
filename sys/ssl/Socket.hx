@@ -181,6 +181,10 @@ class Socket {
 		verifyCertFolder = folder;
 	}
 
+	public function validateHostname( hostname : String ){
+		validate_hostname( ssl, untyped hostname.__s );
+	}
+
 	public function useCertificate( certFile : String, keyFile : String ){
 		useCertFile = certFile;
 		useKeyFile = keyFile;
@@ -216,7 +220,7 @@ class Socket {
 
 	public function bind( host : Host, port : Int ) : Void {
 		ctx = SSL_CTX_new( SSLv23_server_method() );
-		SSL_CTX_use_certificate_file( ctx, useCertFile, useKeyFile );
+		SSL_CTX_use_certificate_file( ctx, untyped useCertFile.__s, untyped useKeyFile.__s );
 		socket_bind( __s, host.ip, port );
 	}
 
@@ -321,6 +325,7 @@ class Socket {
 	
 	private static var SSLv23_client_method = load( 'SSLv23_client_method' );
 	private static var SSLv23_server_method = load( 'SSLv23_server_method' );
+	private static var validate_hostname = load( 'validate_hostname', 2 );
 	
 	private static var SSL_CTX_new = load( 'SSL_CTX_new', 1 );
 	private static var SSL_CTX_close = load( 'SSL_CTX_close', 1 );
