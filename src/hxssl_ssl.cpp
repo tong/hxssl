@@ -354,15 +354,6 @@ static value hxssl_SSL_recv( value ssl, value data, value pos, value len ) {
 	//printf("hxssl_SSL_recv %i %i\n", p, l );
 	void * buf = (void *) (val_string(data) + p);
 	int dlen = SSL_read( val_ssl(ssl), buf, l );
-	/*
-	// TODO
-	if( dlen == 0 ) {
-		int err = SSL_get_error( val_ssl(ssl), dlen );
-		printf("ssl_error=%i, errno=%i\n",err,errno);
-		neko_error();
-	}
-	*/
-	//if( dlen == SOCKET_ERROR )
 	return alloc_int( dlen );
 
 	/*
