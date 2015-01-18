@@ -140,6 +140,7 @@ class Socket {
 
 	private var useCertFile : String;
 	private var useKeyFile : String;
+	private var altSNIContexts : Null<Array<{match: String->Bool, ctx: CTX}>>;
 
 	public function new() {
 		//connected = secure = false;
@@ -215,6 +216,10 @@ class Socket {
 //		SSL_shutdown( ssl );
 		SSL_close( ssl );
 		SSL_CTX_close( ctx );
+		if( altSNIContexts != null ){
+			for( c in altSNIContexts )
+				SSL_CTX_close( c.ctx );
+		}
 		//SSL_free( ssl ); 
 		socket_close( __s );
 		input.__s = output.__s = null;
@@ -223,9 +228,31 @@ class Socket {
 		output.close();
 	}
 
+	public function addSNICertificate( cbServernameMatch : String->Bool, certFile : String, keyFile : String ) : Void{
+		if( altSNIContexts == null )
+			altSNIContexts = [];
+
+		var nctx = SSL_CTX_new( SSLv23_server_method() );
+		SSL_CTX_use_certificate_file( nctx, untyped certFile.__s, untyped keyFile.__s );
+		altSNIContexts.push( {match: cbServernameMatch, ctx: nctx} );
+	}
+
 	public function bind( host : Host, port : Int ) : Void {
 		ctx = SSL_CTX_new( SSLv23_server_method() );
-		SSL_CTX_use_certificate_file( ctx, untyped useCertFile.__s, untyped useKeyFile.__s );
+
+		if( useCertFile != null && useKeyFile != null )
+			SSL_CTX_use_certificate_file( ctx, untyped useCertFile.__s, untyped useKeyFile.__s );
+
+		if( altSNIContexts != null ){
+			SSL_set_tlsext_servername_callback( ctx, function(servername){
+				for( c in altSNIContexts ){
+					if( c.match(servername) )
+						return c.ctx;
+				}
+				return null;
+			});
+		}
+
 		socket_bind( __s, host.ip, port );
 	}
 
@@ -333,6 +360,7 @@ class Socket {
 
 	private static var validate_hostname = load( 'validate_hostname', 2 );
 	private static var SSL_set_tlsext_host_name = load( "SSL_set_tlsext_host_name", 2 );
+	private static var SSL_set_tlsext_servername_callback = load( "SSL_set_tlsext_servername_callback", 2 );
 	
 	private static var SSL_CTX_new = load( 'SSL_CTX_new', 1 );
 	private static var SSL_CTX_close = load( 'SSL_CTX_close', 1 );

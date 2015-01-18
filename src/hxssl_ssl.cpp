@@ -285,6 +285,28 @@ static value hxssl_SSL_CTX_use_certificate_file( value ctx, value certFile, valu
 	return alloc_null();
 }
 
+static int hxssl_ssl_servername_cb(SSL *ssl, int *ad, void *arg){
+	AutoGCRoot *p = (AutoGCRoot *)arg;
+	const char *servername = SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name);
+	
+	if( servername && p != 0 ){
+	 	value ret = val_call1(p->get(), alloc_string(servername)) ;
+		if( !val_is_null(ret) )
+			SSL_set_SSL_CTX( ssl, val_ctx(ret) );
+	}
+	
+	return SSL_TLSEXT_ERR_OK;
+}
+
+static value hxssl_SSL_set_tlsext_servername_callback( value ctx, value cb ){
+	SSL_CTX *_ctx = val_ctx(ctx);
+	AutoGCRoot *arg = new AutoGCRoot(cb);
+
+	SSL_CTX_set_tlsext_servername_callback( _ctx, hxssl_ssl_servername_cb );
+	SSL_CTX_set_tlsext_servername_arg( _ctx, (void *)arg );
+	return alloc_null();
+}
+
 static value hxssl_BIO_NOCLOSE() {
 	return alloc_int( BIO_NOCLOSE );
 }
@@ -478,6 +500,7 @@ DEFINE_PRIM( hxssl_SSL_CTX_set_verify, 1 );
 DEFINE_PRIM( hxssl_SSL_CTX_use_certificate_file, 3 );
 DEFINE_PRIM( hxssl_validate_hostname, 2 );
 DEFINE_PRIM( hxssl_SSL_set_tlsext_host_name, 2 );
+DEFINE_PRIM( hxssl_SSL_set_tlsext_servername_callback, 2 );
 
 DEFINE_PRIM( hxssl_BIO_NOCLOSE, 0 );
 DEFINE_PRIM( hxssl_BIO_new_socket, 2 );
