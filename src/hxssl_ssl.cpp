@@ -4,6 +4,7 @@
 
 #include <hx/CFFI.h>
 #include <stdio.h>
+#include <string.h>
 
 #if !_MSC_VER
 #include <sys/socket.h>
@@ -13,6 +14,11 @@
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 #include <openssl/x509v3.h>
+
+#ifdef _MSC_VER 
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#endif
 
 #if !_MSC_VER
 typedef int SOCKET;
@@ -261,11 +267,14 @@ static value hxssl_validate_hostname( value ssl, value hostname ){
 	}
 
 	neko_error();
+	return alloc_null();
 }
+
 static value hxssl_SSL_set_tlsext_host_name( value ssl, value hostname ){
 	val_check(hostname,string);
 	if( !SSL_set_tlsext_host_name( val_ssl(ssl), val_string(hostname) ) )
 		neko_error();
+	return alloc_null();
 }
 
 static value hxssl_SSL_CTX_set_verify( value ctx ) {
@@ -462,6 +471,7 @@ static value hxssl___SSL_write( value ssl, value data ) {
 // keep for compat
 static value hxssl___SSL_accept( value n ) {
 	neko_error();
+	return alloc_null();
 }
 
 static value hxssl_SSL_accept( value ssl, value sock ) {
