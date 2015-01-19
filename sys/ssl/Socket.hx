@@ -46,7 +46,7 @@ private class SocketInput extends haxe.io.Input {
 	}
 
 	public override function readBytes( buf : Bytes, pos : Int, len : Int ) : Int {
-		var r;
+		var r : Int;
 		if( ssl == null || __s == null )
 			throw "Invalid handle";
 		try {
@@ -240,6 +240,7 @@ class Socket {
 	public function bind( host : Host, port : Int ) : Void {
 		ctx = buildSSLContext( true );
 
+		SSL_CTX_set_session_id_context( ctx, haxe.crypto.Md5.make(haxe.io.Bytes.ofString(host.toString()+":"+port)).getData() );
 		socket_bind( __s, host.ip, port );
 	}
 
@@ -363,6 +364,7 @@ class Socket {
 	private static var SSL_CTX_load_verify_locations = load( 'SSL_CTX_load_verify_locations', 3 );
 	private static var SSL_CTX_set_verify = load( 'SSL_CTX_set_verify', 1 );
 	private static var SSL_CTX_use_certificate_file = load( 'SSL_CTX_use_certificate_file', 3 );
+	private static var SSL_CTX_set_session_id_context = load( 'SSL_CTX_set_session_id_context', 2 );
 	
 	private static var BIO_new_socket = load( "BIO_new_socket", 2 );
 	private static var BIO_NOCLOSE = load( "BIO_NOCLOSE", 0 );

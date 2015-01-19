@@ -296,6 +296,18 @@ static value hxssl_SSL_CTX_use_certificate_file( value ctx, value certFile, valu
 	return alloc_null();
 }
 
+static value hxssl_SSL_CTX_set_session_id_context( value ctx, value sid ) {
+	val_check(sid,string);
+
+	SSL_CTX *_ctx = val_ctx(ctx);
+	const char *_sid = val_string(sid);
+
+	if( SSL_CTX_set_session_id_context(_ctx, (unsigned char *)_sid, sizeof _sid) != 1 )
+		neko_error();
+
+    return alloc_null();
+}
+
 static int hxssl_ssl_servername_cb(SSL *ssl, int *ad, void *arg){
 	AutoGCRoot *p = (AutoGCRoot *)arg;
 	const char *servername = SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name);
@@ -365,6 +377,8 @@ static value hxssl_SSL_recv( value ssl, value data, value pos, value len ) {
 	//printf("hxssl_SSL_recv %i %i\n", p, l );
 	void * buf = (void *) (val_string(data) + p);
 	int dlen = SSL_read( val_ssl(ssl), buf, l );
+	if( dlen < 0 )
+		neko_error();
 	return alloc_int( dlen );
 
 	/*
@@ -508,6 +522,7 @@ DEFINE_PRIM( hxssl_SSL_CTX_close, 1 );
 DEFINE_PRIM( hxssl_SSL_CTX_load_verify_locations, 3 );
 DEFINE_PRIM( hxssl_SSL_CTX_set_verify, 1 );
 DEFINE_PRIM( hxssl_SSL_CTX_use_certificate_file, 3 );
+DEFINE_PRIM( hxssl_SSL_CTX_set_session_id_context, 2 );
 DEFINE_PRIM( hxssl_validate_hostname, 2 );
 DEFINE_PRIM( hxssl_SSL_set_tlsext_host_name, 2 );
 DEFINE_PRIM( hxssl_SSL_set_tlsext_servername_callback, 2 );
