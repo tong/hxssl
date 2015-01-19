@@ -73,6 +73,8 @@ static value hxssl_SSL_load_error_strings() {
 
 static value hxssl_SSL_new( value ctx ) {
 	SSL* ssl = SSL_new( val_ctx(ctx) );
+	if( ssl == NULL )
+		neko_error();
 	return alloc_abstract( k_ssl_ctx, ssl );
 }
 
@@ -277,7 +279,7 @@ static value hxssl_SSL_CTX_set_verify( value ctx ) {
 
 static value hxssl_SSL_CTX_use_certificate_file( value ctx, value certFile, value privateKeyFile ) {
 	SSL_CTX* _ctx = val_ctx(ctx);
-	SSL_CTX_use_certificate_file( _ctx, val_string(certFile), SSL_FILETYPE_PEM );
+	SSL_CTX_use_certificate_chain_file( _ctx, val_string(certFile) );
 	SSL_CTX_use_PrivateKey_file( _ctx, val_string(privateKeyFile), SSL_FILETYPE_PEM );
 	if( !SSL_CTX_check_private_key(_ctx) ) {
  		neko_error();
@@ -457,8 +459,15 @@ static value hxssl___SSL_write( value ssl, value data ) {
 	return alloc_null();
 }
 
-static value hxssl___SSL_accept( value ssl, value sock ) {
+// keep for compat
+static value hxssl___SSL_accept( value n ) {
+	neko_error();
+}
+
+static value hxssl_SSL_accept( value ssl, value sock ) {
 	SSL* _ssl = val_ssl( ssl );
+	if( _ssl == NULL )
+		neko_error();
 	int _sock = ((int_val) val_data(sock) );
 	if( !SSL_set_fd( _ssl, _sock ) )
 	    neko_error();
@@ -504,4 +513,5 @@ DEFINE_PRIM( hxssl_SSL_recv_char, 1 );
 DEFINE_PRIM( hxssl___SSL_read, 1 );
 DEFINE_PRIM( hxssl___SSL_write, 2 );
 
-DEFINE_PRIM( hxssl___SSL_accept, 2 );
+DEFINE_PRIM( hxssl___SSL_accept, 1 );
+DEFINE_PRIM( hxssl_SSL_accept, 2 );

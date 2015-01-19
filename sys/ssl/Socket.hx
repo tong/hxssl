@@ -138,7 +138,7 @@ class Socket {
 	private var verifyCertFolder : String;
 	private var verifyHostname : String;
 
-	private var useCertFile : String;
+	private var useCertChainFile : String;
 	private var useKeyFile : String;
 	private var altSNIContexts : Null<Array<{match: String->Bool, ctx: CTX}>>;
 
@@ -154,7 +154,7 @@ class Socket {
 	public function connect(host : Host, port : Int) : Void {
 		try {
 			socket_connect( __s, host.ip, port );
-			ctx = buildSSLContext();
+			ctx = buildSSLContext( false );
 			ssl = SSL_new( ctx );
 			input.ssl = ssl;
 			output.ssl = ssl;
@@ -191,8 +191,8 @@ class Socket {
 		verifyHostname = hostname;
 	}
 
-	public function useCertificate( certFile : String, keyFile : String ){
-		useCertFile = certFile;
+	public function useCertificate( certChainFile : String, keyFile : String ){
+		useCertChainFile = certChainFile;
 		useKeyFile = keyFile;
 	}
 
@@ -228,30 +228,17 @@ class Socket {
 		output.close();
 	}
 
-	public function addSNICertificate( cbServernameMatch : String->Bool, certFile : String, keyFile : String ) : Void{
+	public function addSNICertificate( cbServernameMatch : String->Bool, certChainFile : String, keyFile : String ) : Void{
 		if( altSNIContexts == null )
 			altSNIContexts = [];
 
 		var nctx = SSL_CTX_new( SSLv23_server_method() );
-		SSL_CTX_use_certificate_file( nctx, untyped certFile.__s, untyped keyFile.__s );
+		SSL_CTX_use_certificate_file( nctx, untyped certChainFile.__s, untyped keyFile.__s );
 		altSNIContexts.push( {match: cbServernameMatch, ctx: nctx} );
 	}
 
 	public function bind( host : Host, port : Int ) : Void {
-		ctx = SSL_CTX_new( SSLv23_server_method() );
-
-		if( useCertFile != null && useKeyFile != null )
-			SSL_CTX_use_certificate_file( ctx, untyped useCertFile.__s, untyped useKeyFile.__s );
-
-		if( altSNIContexts != null ){
-			SSL_set_tlsext_servername_callback( ctx, function(servername){
-				for( c in altSNIContexts ){
-					if( c.match(servername) )
-						return c.ctx;
-				}
-				return null;
-			});
-		}
+		ctx = buildSSLContext( true );
 
 		socket_bind( __s, host.ip, port );
 	}
@@ -317,18 +304,27 @@ class Socket {
 		SSL_load_error_strings();
 	}
 
-	private function buildSSLContext() : CTX {
-		var ctx : CTX = SSL_CTX_new( SSLv23_client_method() );
+	private function buildSSLContext( server : Bool ) : CTX {
+		var ctx : CTX = SSL_CTX_new( server ? SSLv23_server_method() : SSLv23_client_method() );
 		if( validateCert ) {
 			var r : Int = SSL_CTX_load_verify_locations( ctx, verifyCertFile, verifyCertFolder );
 			if( r == 0 )
 				throw "Failed to load certificates";
 			SSL_CTX_set_verify( ctx );
 		}
-		if( useCertFile != null ){
-			var r : Int = SSL_CTX_use_certificate_file( ctx, useCertFile, useKeyFile );
+		if( useCertChainFile != null && useKeyFile != null ){
+			var r : Int = SSL_CTX_use_certificate_file( ctx, useCertChainFile, useKeyFile );
 			if( r == 0 )
 				throw "Failed to use certificate";
+		}
+		if( altSNIContexts != null ){
+			SSL_set_tlsext_servername_callback( ctx, function(servername){
+				for( c in altSNIContexts ){
+					if( c.match(servername) )
+						return c.ctx;
+				}
+				return null;
+			});
 		}
 		return ctx;
 	}
@@ -374,7 +370,7 @@ class Socket {
 	private static var socket_read = load( '__SSL_read', 1 );
 	private static var socket_write = load( '__SSL_write', 2 );
 	//private static var socket_listen = lib( '__SSL_listen', 3 );
-	private static var SSL_accept = load( '__SSL_accept', 2 );
+	private static var SSL_accept = load( 'SSL_accept', 2 );
 	
 	@:allow(sys.ssl)
 	private static function load( f : String, args : Int = 0 ) : Dynamic {
