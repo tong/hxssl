@@ -46,7 +46,7 @@ private class SocketInput extends haxe.io.Input {
 	}
 
 	public override function readBytes( buf : Bytes, pos : Int, len : Int ) : Int {
-		var r;
+		var r : Int;
 		if( ssl == null || __s == null )
 			throw "Invalid handle";
 		try {
@@ -133,8 +133,14 @@ class Socket {
 	private var __s : Dynamic;
 	private var ctx : CTX;
 	private var ssl : SSL;
-	private var certFile : String;
-	private var certFolder : String;
+
+	private var verifyCertFile : String;
+	private var verifyCertFolder : String;
+	private var verifyHostname : String;
+
+	private var useCertChainFile : String;
+	private var useKeyFile : String;
+	private var altSNIContexts : Null<Array<{match: String->Bool, ctx: CTX}>>;
 
 	public function new() {
 		//connected = secure = false;
@@ -148,13 +154,17 @@ class Socket {
 	public function connect(host : Host, port : Int) : Void {
 		try {
 			socket_connect( __s, host.ip, port );
-			ctx = buildSSLContext();
+			ctx = buildSSLContext( false );
 			ssl = SSL_new( ctx );
 			input.ssl = ssl;
 			output.ssl = ssl;
 			var sbio = BIO_new_socket( __s, BIO_NOCLOSE() );
 			SSL_set_bio( ssl, sbio, sbio );
+			if( verifyHostname != null )
+				SSL_set_tlsext_host_name( ssl, untyped verifyHostname.__s );
 			var r : Int = SSL_connect( ssl );
+			if( verifyHostname != null )
+				validate_hostname( ssl, untyped verifyHostname.__s );
 			//connected = true;
 		} catch( s : String ) {
 			if( s == "std@socket_connect" )
@@ -173,8 +183,17 @@ class Socket {
 		By default certficate locations are automatically detected.
 	*/
 	public function setCertLocation( file : String, folder : String ) {
-		certFile = file;
-		certFolder = folder;
+		verifyCertFile = file;
+		verifyCertFolder = folder;
+	}
+
+	public function setHostname( hostname : String ){
+		verifyHostname = hostname;
+	}
+
+	public function useCertificate( certChainFile : String, keyFile : String ){
+		useCertChainFile = certChainFile;
+		useKeyFile = keyFile;
 	}
 
 	//TODO
@@ -197,6 +216,10 @@ class Socket {
 //		SSL_shutdown( ssl );
 		SSL_close( ssl );
 		SSL_CTX_close( ctx );
+		if( altSNIContexts != null ){
+			for( c in altSNIContexts )
+				SSL_CTX_close( c.ctx );
+		}
 		//SSL_free( ssl ); 
 		socket_close( __s );
 		input.__s = output.__s = null;
@@ -205,40 +228,40 @@ class Socket {
 		output.close();
 	}
 
-	/*
+	public function addSNICertificate( cbServernameMatch : String->Bool, certChainFile : String, keyFile : String ) : Void{
+		if( altSNIContexts == null )
+			altSNIContexts = [];
+
+		var nctx = SSL_CTX_new( SSLv23_server_method() );
+		SSL_CTX_use_certificate_file( nctx, untyped certChainFile.__s, untyped keyFile.__s );
+		altSNIContexts.push( {match: cbServernameMatch, ctx: nctx} );
+	}
+
 	public function bind( host : Host, port : Int ) : Void {
-		
-		//TODO
-		
-		trace("bind");
-		
-		ctx = SSL_CTX_new( SSLv23_client_method() );
-		SSL_CTX_use_certificate_file( ctx, "server.crt", "server.key" );
-		
-		ssl = SSL_new( ctx );
-		input.ssl = ssl;
-		output.ssl = ssl;
-		var bio = BIO_new_socket( __s, BIO_NOCLOSE() );
-		SSL_set_bio( ssl, bio, bio );
+		ctx = buildSSLContext( true );
+
+		SSL_CTX_set_session_id_context( ctx, haxe.crypto.Md5.make(haxe.io.Bytes.ofString(host.toString()+":"+port)).getData() );
 		socket_bind( __s, host.ip, port );
 	}
 
 	public function listen( connections : Int ) : Void {
 		socket_listen( __s, connections );
-		//socket_listen( __s, ssl, connections );
 	}
 
 	public function accept() : Socket {
-		trace("accept");
 		var c = socket_accept( __s );
+		var ssl = SSL_new( ctx );
+
 		var s = Type.createEmptyInstance( sys.ssl.Socket );
 		s.__s = c;
-		//s.ssl = ssl;
-		ssl_accept( ssl );
+		s.ssl = ssl;
 		s.input = new SocketInput(c);
 		s.input.ssl = ssl;
 		s.output = new SocketOutput(c);
 		s.output.ssl = ssl;
+
+		SSL_accept( ssl, c );
+
 		return s;
 	}
 
@@ -248,7 +271,6 @@ class Socket {
 		untyped h.ip = a[0];
 		return { host : h, port : a[1] };
 	}
-	*/
 
 	public function shutdown( read : Bool, write : Bool ) : Void {
 		SSL_shutdown( ssl );
@@ -283,13 +305,27 @@ class Socket {
 		SSL_load_error_strings();
 	}
 
-	private function buildSSLContext() : CTX {
-		var ctx : CTX = SSL_CTX_new( SSLv23_client_method() );
+	private function buildSSLContext( server : Bool ) : CTX {
+		var ctx : CTX = SSL_CTX_new( server ? SSLv23_server_method() : SSLv23_client_method() );
 		if( validateCert ) {
-			var r : Int = SSL_CTX_load_verify_locations( ctx, certFile, certFolder );
+			var r : Int = SSL_CTX_load_verify_locations( ctx, verifyCertFile, verifyCertFolder );
 			if( r == 0 )
 				throw "Failed to load certificates";
 			SSL_CTX_set_verify( ctx );
+		}
+		if( useCertChainFile != null && useKeyFile != null ){
+			var r : Int = SSL_CTX_use_certificate_file( ctx, useCertChainFile, useKeyFile );
+			if( r == 0 )
+				throw "Failed to use certificate";
+		}
+		if( altSNIContexts != null ){
+			SSL_set_tlsext_servername_callback( ctx, function(servername){
+				for( c in altSNIContexts ){
+					if( c.match(servername) )
+						return c.ctx;
+				}
+				return null;
+			});
 		}
 		return ctx;
 	}
@@ -317,13 +353,18 @@ class Socket {
 	private static var SSL_set_bio = load( "SSL_set_bio", 3 );
 	
 	private static var SSLv23_client_method = load( 'SSLv23_client_method' );
-	private static var TLSv1_client_method = load( 'TLSv1_client_method' );
+	private static var SSLv23_server_method = load( 'SSLv23_server_method' );
+
+	private static var validate_hostname = load( 'validate_hostname', 2 );
+	private static var SSL_set_tlsext_host_name = load( "SSL_set_tlsext_host_name", 2 );
+	private static var SSL_set_tlsext_servername_callback = load( "SSL_set_tlsext_servername_callback", 2 );
 	
 	private static var SSL_CTX_new = load( 'SSL_CTX_new', 1 );
 	private static var SSL_CTX_close = load( 'SSL_CTX_close', 1 );
 	private static var SSL_CTX_load_verify_locations = load( 'SSL_CTX_load_verify_locations', 3 );
 	private static var SSL_CTX_set_verify = load( 'SSL_CTX_set_verify', 1 );
 	private static var SSL_CTX_use_certificate_file = load( 'SSL_CTX_use_certificate_file', 3 );
+	private static var SSL_CTX_set_session_id_context = load( 'SSL_CTX_set_session_id_context', 2 );
 	
 	private static var BIO_new_socket = load( "BIO_new_socket", 2 );
 	private static var BIO_NOCLOSE = load( "BIO_NOCLOSE", 0 );
@@ -331,7 +372,7 @@ class Socket {
 	private static var socket_read = load( '__SSL_read', 1 );
 	private static var socket_write = load( '__SSL_write', 2 );
 	//private static var socket_listen = lib( '__SSL_listen', 3 );
-	private static var ssl_accept = load( '__SSL_accept', 1 );
+	private static var SSL_accept = load( 'SSL_accept', 2 );
 	
 	@:allow(sys.ssl)
 	private static function load( f : String, args : Int = 0 ) : Dynamic {
