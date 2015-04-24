@@ -123,12 +123,20 @@ private class SocketOutput extends haxe.io.Output {
 */
 class Socket {
 
+	/**
+		Socket input stream.
+	**/
 	public var input(default,null) : SocketInput;
+	
+	/**
+		Socket output stream.
+	**/
 	public var output(default,null) : SocketOutput;
-	public var custom : Dynamic;
+	
+	/**
+		If true then client socket will validate server sent certificate. Defaults to true.
+	**/
 	public var validateCert : Bool;
-	//public var connected : Bool;
-	//public var secure : Bool;
 	
 	private var __s : Dynamic;
 	private var ctx : CTX;
@@ -141,7 +149,12 @@ class Socket {
 	private var useCertChainFile : String;
 	private var useKeyFile : String;
 	private var altSNIContexts : Null<Array<{match: String->Bool, ctx: CTX}>>;
-
+	
+	/**
+		Create a new SSL socket object.
+		
+		Socket can be run in either client or server mode.
+	**/
 	public function new() {
 		//connected = secure = false;
 		initSSL();
@@ -150,7 +163,10 @@ class Socket {
 		output = new SocketOutput( __s );
 		validateCert = true;
 	}
-
+	
+	/**
+		Initiate a connection to a remote host.
+	**/
 	public function connect(host : Host, port : Int) : Void {
 		try {
 			socket_connect( __s, host.ip, port );
@@ -165,7 +181,6 @@ class Socket {
 			var r : Int = SSL_connect( ssl );
 			if( verifyHostname != null )
 				validate_hostname( ssl, untyped verifyHostname.__s );
-			//connected = true;
 		} catch( s : String ) {
 			if( s == "std@socket_connect" )
 				throw "Failed to connect on "+(try host.reverse() catch(e:Dynamic) host.toString())+":"+port;
@@ -181,16 +196,27 @@ class Socket {
 		
 		This should only be used if you know what you are doing.
 		By default certficate locations are automatically detected.
-	*/
+		
+		Client mode only.
+	**/
 	public function setCertLocation( file : String, folder : String ) {
 		verifyCertFile = file;
 		verifyCertFolder = folder;
 	}
-
+	
 	public function setHostname( hostname : String ){
 		verifyHostname = hostname;
 	}
-
+	
+	/**
+		Set certificate and private key locations.
+		
+		Both the certificate and private key should be in PEM format.
+		
+		The certificate should contain both the certificate itself as well as the rest of the chain.
+		
+		Server mode only.
+	**/
 	public function useCertificate( certChainFile : String, keyFile : String ){
 		useCertChainFile = certChainFile;
 		useKeyFile = keyFile;
@@ -198,20 +224,27 @@ class Socket {
 
 	//TODO
 	//public function setSecure() {}
-
+	
+	/**
+		Read the whole data available on the socket.
+	**/
 	public function read() : String {
-		trace("read");
 		var b = socket_read( ssl );
 		if( b == null )
 			return "";
-		trace("reat");
 		return b.toString();
 	}
-
+	
+	/**
+		Write the whole data to the socket output.
+	**/
 	public function write( content : String ) {
 		socket_write( ssl, content );
 	}
-
+	
+	/**
+		Closes the socket : make sure to properly close all your sockets or you will crash when you run out of file descriptors.
+	**/
 	public function close() : Void {
 //		SSL_shutdown( ssl );
 		SSL_close( ssl );
@@ -227,7 +260,14 @@ class Socket {
 		input.close();
 		output.close();
 	}
-
+	
+	/**
+		Add a certificate, private key for the given server name.
+		
+		Only works for SNI-enabled clients.
+		
+		Server mode only.
+	**/
 	public function addSNICertificate( cbServernameMatch : String->Bool, certChainFile : String, keyFile : String ) : Void{
 		if( altSNIContexts == null )
 			altSNIContexts = [];
@@ -236,18 +276,27 @@ class Socket {
 		SSL_CTX_use_certificate_file( nctx, untyped certChainFile.__s, untyped keyFile.__s );
 		altSNIContexts.push( {match: cbServernameMatch, ctx: nctx} );
 	}
-
+	
+	/**
+		Bind the socket to the given host/port so it can afterwards listen for connections there.
+	**/
 	public function bind( host : Host, port : Int ) : Void {
 		ctx = buildSSLContext( true );
 
 		SSL_CTX_set_session_id_context( ctx, haxe.crypto.Md5.make(haxe.io.Bytes.ofString(host.toString()+":"+port)).getData() );
 		socket_bind( __s, host.ip, port );
 	}
-
+	
+	/**
+		Allow the socket to listen for incoming questions. The parameter tells how many pending connections we can have until they get refused. Use [accept()] to accept incoming connections.
+	**/
 	public function listen( connections : Int ) : Void {
 		socket_listen( __s, connections );
 	}
-
+	
+	/**
+		Accept a new connected client. This will return a connected socket on which you can read/write some data.
+	**/
 	public function accept() : Socket {
 		var c = socket_accept( __s );
 		var ssl = SSL_new( ctx );
@@ -264,38 +313,59 @@ class Socket {
 
 		return s;
 	}
-
+	
+	/**
+		Return the informations about the other side of a connected socket.
+	**/
 	public function peer() : { host : Host, port : Int } {
 		var a : Dynamic = socket_peer(__s);
 		var h = new Host("127.0.0.1");
 		untyped h.ip = a[0];
 		return { host : h, port : a[1] };
 	}
-
+	
+	/**
+		Shutdown the socket, either for reading or writing.
+	**/
 	public function shutdown( read : Bool, write : Bool ) : Void {
 		SSL_shutdown( ssl );
 		socket_shutdown( __s, read, write );
 	}
-
+	
+	/**
+		Return the informations about our side of a connected socket.
+	**/
 	public function host() : { host : Host, port : Int } {
 		var a : Dynamic = socket_host( __s );
 		var h = new Host( "127.0.0.1" );
 		untyped h.ip = a[0];
 		return { host : h, port : a[1] };
 	}
-
+	
+	/**
+		Gives a timeout after which blocking socket operations (such as reading and writing) will abort and throw an exception.
+	**/
 	public function setTimeout( timeout : Float ) : Void {
 		socket_set_timeout( __s, timeout );
 	}
-
+	
+	/**
+		Block until some data is available for read on the socket.
+	**/
 	public function waitForRead() : Void {
 		select([this],null,null,null);
 	}
-
+	
+	/**
+		Change the blocking mode of the socket. A blocking socket is the default behavior. A non-blocking socket will abort blocking operations immediatly by throwing a haxe.io.Error.Blocking value.
+	**/
 	public function setBlocking( b : Bool ) : Void {
 		socket_set_blocking(__s,b);
 	}
-
+	
+	/**
+		Allows the socket to immediatly send the data when written to its output : this will cause less ping but might increase the number of packets / data size, especially when doing a lot of small writes.
+	**/
 	public function setFastSend( b : Bool ) : Void {
 		socket_set_fast_send(__s,b);
 	}
@@ -329,7 +399,15 @@ class Socket {
 		}
 		return ctx;
 	}
-
+	
+	/**
+		Wait until one of the sockets groups is ready for the given operation :
+		[read] contains sockets on which we want to wait for available data to be read,
+		[write] contains sockets on which we want to wait until we are allowed to write some data to their output buffers,
+		[others] contains sockets on which we want to wait for exceptional conditions.
+		[select] will block until one of the condition is met, in which case it will return the sockets for which the condition was true.
+		In case a [timeout] (in seconds) is specified, select might wait at worse until the timeout expires.
+	**/
 	public static function select( read : Array<Socket>, write : Array<Socket>, others : Array<Socket>, ?timeout : Float ) : { read: Array<Socket>, write: Array<Socket>, others: Array<Socket> } {
 		var neko_array = socket_select( read, write, others, timeout );
 		if( neko_array == null )
