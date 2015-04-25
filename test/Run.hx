@@ -10,8 +10,13 @@ class Run {
 		r.add( new TestSHA1() );
 		r.add( new TestSHA256() );
 		r.add( new TestRIPEMD160() );
+		r.add( new TestHttp() );
 		
-		r.run();
+		if (r.run()) {
+			Sys.exit(0);
+		} else {
+			Sys.exit(1);
+		}
 	}
 	
 }

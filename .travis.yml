@@ -1,0 +1,17 @@
+language: haxe
+
+os:
+  - linux
+  - osx
+
+install:
+  - haxelib install hxcpp
+  - make
+  - mv ndll/Linux64/hxssl.ndll ~/neko/
+
+script:
+  - cd test
+  - haxe build-neko.hxml
+  - neko test
+  - haxe build-cpp.hxml
+  - ./Run
