@@ -12,10 +12,8 @@ class SHA256 {
 	public static inline var DIGEST_LENGTH = 32;
 	
 	public static inline function encode( s : String ) : String {
-		#if cpp
+		#if (cpp||neko)
 		return _sha256( s );
-		#elseif neko
-		return Lib.nekoToHaxe( _sha256( Lib.haxeToNeko(s) ) );
 		#end
 	}
 	

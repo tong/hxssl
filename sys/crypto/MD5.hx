@@ -16,10 +16,8 @@ class MD5 {
 	public static inline function encode( s : String, raw : Bool = false ) : String {
 		if( raw )
 			throw( "MD5 raw encoding not implemented" );
-		#if cpp
+		#if (cpp||neko)
 		return _md5( s, raw );
-		#elseif neko
-		return Lib.nekoToHaxe( _md5( Lib.haxeToNeko(s), raw ) );
 		#elseif php
 		return untyped __call__( "md5", s, raw );
 		#end

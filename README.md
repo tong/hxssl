@@ -2,6 +2,7 @@ HXSSL
 =====
 Haxe Cpp/Neko OpenSSL bindings  
 
+[![Build Status](https://travis-ci.org/tong/hxssl.svg?branch=master)](https://travis-ci.org/tong/hxssl)
 
 ### Windows build
 Modify your .hxcpp_config.xml to integrate openssl library ( you can download standalone ones or cygwin ones ).
