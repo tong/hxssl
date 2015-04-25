@@ -12,20 +12,16 @@ import neko.Lib;
 class Base64 {
 
 	public static inline function encode( s : String ) : String {
-		#if cpp
+		#if (cpp||neko)
 		return _encode( s );
-		#elseif neko
-		return Lib.nekoToHaxe( _encode( Lib.haxeToNeko(s) ) );
 		#elseif php
 		return untyped __call__( "base64_encode", s );
 		#end
 	}
 	
 	public static inline function decode( s : String ) : String {
-		#if cpp
+		#if (cpp||neko)
 		return _decode( s );
-		#elseif neko
-		return Lib.nekoToHaxe( _decode( Lib.haxeToNeko(s) ) );
 		#elseif php
 		return untyped __call__( "base64_decode", s );
 		#end

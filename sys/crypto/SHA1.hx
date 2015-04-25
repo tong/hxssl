@@ -14,10 +14,8 @@ class SHA1 {
 	public static inline var DIGEST_LENGTH = 20;
 	
 	public static inline function encode( s : String ) : String {
-		#if cpp
+		#if (cpp||neko)
 		return _sha1( s );
-		#elseif neko
-		return Lib.nekoToHaxe( _sha1( Lib.haxeToNeko(s) ) );
 		#elseif php
 		return untyped __call__( "sha1", s );
 		#end
