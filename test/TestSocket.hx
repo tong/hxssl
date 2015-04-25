@@ -7,6 +7,7 @@ class TestSocket extends haxe.unit.TestCase {
 		var socket = new sys.ssl.Socket();
 		socket.connect( new sys.net.Host( "talk.google.com" ), 5223 );
 		socket.close();
+		assertTrue( true );
 	}
 	
 }

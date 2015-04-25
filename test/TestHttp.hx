@@ -17,11 +17,13 @@ class TestHttp extends haxe.unit.TestCase {
 	public function test_http() {
 		// Test regular http
 		haxe.Http.requestUrl("http://www.w3.org/");
+		assertTrue( true );
 	}
 	
 	public function test_https_valid_cert() {
 		// Test a valid https certificate
 		haxe.Http.requestUrl("https://www.google.com/");
+		assertTrue( true );
 	}
 	
 	public function test_https_invalid_cert() {
