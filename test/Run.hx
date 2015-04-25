@@ -11,6 +11,7 @@ class Run {
 		r.add( new TestSHA256() );
 		r.add( new TestRIPEMD160() );
 		r.add( new TestHttp() );
+		r.add( new TestSocket() );
 		
 		if (r.run()) {
 			Sys.exit(0);
