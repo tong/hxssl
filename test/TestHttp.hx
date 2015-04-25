@@ -4,14 +4,14 @@ import sys.crypto.SHA256;
 class TestHttp extends haxe.unit.TestCase {
 	
 	function assertError (f:Void->Void) {
-		var err;
+		var err:Bool;
 		try {
 			f();
 			err = false;
 		} catch (e:Dynamic) {
 			err = true;
 		}
-		assertTrue( err, true );
+		assertTrue( err );
 	}
 
 	public function test_http() {
