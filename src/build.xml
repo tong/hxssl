@@ -10,6 +10,8 @@
 	<set name="ROOT" value="../" unless="ROOT"/>
 
 	<files id="files">
+      <compilerflag value="-I../openssl/project/include/" />
+      <compilerflag value="-I../openssl/project/include/openssl" />
 		<file name="hxssl_ssl.cpp"/>
 		<file name="hxssl_md5.cpp"/>
 		<file name="hxssl_base64.cpp"/>
@@ -25,11 +27,14 @@
 		<flag value="${LIB_DIR}"/>
 		<files id="files"/>
 		
+      <lib name="../openssl/lib/${BINDIR}/libopenssl${LIBEXT}"/>
+
+      <!--
 		<lib name="-lssl"/>
 		<lib name="-lcrypto"/>
-
 		<lib name="libeay32MT.lib" if="windows" />
 		<lib name="ssleay32MT.lib" if="windows" />
+      -->
 		<lib name="Ws2_32.lib" if="windows" />
 		<lib name="Advapi32.lib" if="windows" />
 		<lib name="Gdi32.lib" if="windows" />

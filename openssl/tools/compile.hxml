@@ -1,0 +1,4 @@
+-main Build
+-neko ../project/build.n
+-lib hxcpp
+-debug
