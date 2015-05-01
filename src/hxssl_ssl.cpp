@@ -172,7 +172,7 @@ static HostnameValidationResult hxssl_match_hostname( const ASN1_STRING *asn1, c
 
 	pattern = (char *)ASN1_STRING_data((ASN1_STRING *)asn1);
 	
-	if( ASN1_STRING_length(asn1) != strlen(pattern) ){
+	if( ASN1_STRING_length((ASN1_STRING *)asn1) != strlen(pattern) ){
 		return MalformedCertificate;
 	}else{
 		wildcard = strchr(pattern, '*');
