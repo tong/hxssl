@@ -1,3 +1,4 @@
+#include <e_os.h>
 
 #define IMPLEMENT_API
 #define NEKO_COMPATIBLE
@@ -54,6 +55,12 @@ typedef enum {
 	Error
 } HostnameValidationResult;
 
+void handle_error()
+{
+   ERR_print_errors_fp(stderr) ;
+   neko_error();
+}
+
 static value block_error() {
 	#ifdef NEKO_WINDOWS
 	int err = WSAGetLastError();
@@ -62,7 +69,7 @@ static value block_error() {
 	if( errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS || errno == EALREADY )
 	#endif
 		val_throw(alloc_string("Blocking"));
-	neko_error();
+	handle_error();
 	return alloc_null();
 }
 
@@ -80,7 +87,7 @@ static value hxssl_SSL_load_error_strings() {
 static value hxssl_SSL_new( value ctx ) {
 	SSL* ssl = SSL_new( val_ctx(ctx) );
 	if( ssl == NULL )
-		neko_error();
+		handle_error();
 	return alloc_abstract( k_ssl_ctx, ssl );
 }
 
@@ -92,7 +99,7 @@ static value hxssl_SSL_close( value ssl ) {
 static value hxssl_SSL_connect( value ssl ) {
 	int r = SSL_connect( val_ssl(ssl) );
 	if( r < 0 )
-		neko_error();
+		handle_error();
 	return alloc_int( r );
 }
 
@@ -248,7 +255,7 @@ static value hxssl_validate_hostname( value ssl, value hostname ){
 	HostnameValidationResult result;
 
 	if( server_cert == NULL )
-		neko_error();
+		handle_error();
 
 	result = hxssl_matches_subject_alternative_name(server_cert, name);
 	if (result == NoSANPresent) 
@@ -266,14 +273,14 @@ static value hxssl_validate_hostname( value ssl, value hostname ){
 			break;
 	}
 
-	neko_error();
+	handle_error();
 	return alloc_null();
 }
 
 static value hxssl_SSL_set_tlsext_host_name( value ssl, value hostname ){
 	val_check(hostname,string);
 	if( !SSL_set_tlsext_host_name( val_ssl(ssl), val_string(hostname) ) )
-		neko_error();
+		handle_error();
 	return alloc_null();
 }
 
@@ -291,7 +298,7 @@ static value hxssl_SSL_CTX_use_certificate_file( value ctx, value certFile, valu
 	SSL_CTX_use_certificate_chain_file( _ctx, val_string(certFile) );
 	SSL_CTX_use_PrivateKey_file( _ctx, val_string(privateKeyFile), SSL_FILETYPE_PEM );
 	if( !SSL_CTX_check_private_key(_ctx) ) {
- 		neko_error();
+ 		handle_error();
 	}
 	return alloc_null();
 }
@@ -303,7 +310,7 @@ static value hxssl_SSL_CTX_set_session_id_context( value ctx, value sid ) {
 	const char *_sid = val_string(sid);
 
 	if( SSL_CTX_set_session_id_context(_ctx, (unsigned char *)_sid, sizeof _sid) != 1 )
-		neko_error();
+		handle_error();
 
     return alloc_null();
 }
@@ -343,7 +350,7 @@ static value hxssl_BIO_new_socket( value sock, value close_flag ) {
 static value hxssl_SSL_send_char( value ssl, value v ) {
 	int c = val_int(v);
 	if( c < 0 || c > 255 )
-		neko_error();
+		handle_error();
 	unsigned char cc;
 	cc = (unsigned char) c;
 	//if( send(val_sock(o),&cc,1,MSG_NOSIGNAL) == SOCKET_ERROR ) return block_error();
@@ -357,7 +364,7 @@ static value hxssl_SSL_send( value ssl, value data, value pos, value len ) {
 	l = val_int(len);
 	dlen = val_strlen(data);
 	if( p < 0 || l < 0 || p > dlen || p + l > dlen )
-		neko_error();
+		handle_error();
 	POSIX_LABEL(send_again);
 	//dlen = send(val_sock(o), val_string(data) + p , l, MSG_NOSIGNAL);
 	dlen = SSL_write( val_ssl(ssl), val_string(data) + p, l );
@@ -378,7 +385,7 @@ static value hxssl_SSL_recv( value ssl, value data, value pos, value len ) {
 	void * buf = (void *) (val_string(data) + p);
 	int dlen = SSL_read( val_ssl(ssl), buf, l );
 	if( dlen < 0 )
-		neko_error();
+		handle_error();
 	return alloc_int( dlen );
 
 	/*
@@ -392,7 +399,7 @@ static value hxssl_SSL_recv( value ssl, value data, value pos, value len ) {
 	l = val_int(len);
 	dlen = val_strlen(data);
 	if( p < 0 || l < 0 || p > dlen || p + l > dlen )
-		neko_error();
+		handle_error();
 	POSIX_LABEL(recv_again);
 	if( retry++ > NRETRYS ) {
 		sock_tmp t;
@@ -417,7 +424,7 @@ static value hxssl_SSL_recv_char(value ssl) {
 	unsigned char c;
 	int r = SSL_read( val_ssl(ssl), &c, 1 );
 	if( r <= 0 )
-		neko_error();
+		handle_error();
 	return alloc_int( c );
 }
 
@@ -484,19 +491,19 @@ static value hxssl___SSL_write( value ssl, value data ) {
 
 // keep for compat
 static value hxssl___SSL_accept( value n ) {
-	neko_error();
+	handle_error();
 	return alloc_null();
 }
 
 static value hxssl_SSL_accept( value ssl, value sock ) {
 	SSL* _ssl = val_ssl( ssl );
 	if( _ssl == NULL )
-		neko_error();
+		handle_error();
 	int _sock = ((int_val) val_data(sock) );
 	if( !SSL_set_fd( _ssl, _sock ) )
-	    neko_error();
+	    handle_error();
 	if( SSL_accept( _ssl ) < 0 )
-	    neko_error();
+	    handle_error();
 	return alloc_null();
 }
 
