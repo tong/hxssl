@@ -1,4 +1,4 @@
-
+#include <e_os.h>
 #include <string.h>
 #include <hx/CFFI.h>
 #include <openssl/bio.h>
