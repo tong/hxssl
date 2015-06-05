@@ -21,25 +21,27 @@
 	</files>
 
 	<target id="hxssl.ndll" tool="linker" toolid="dll" output="hxssl">
-		
+
 		<ext value=".ndll"/>
 		<outdir name="../ndll/${BINDIR}"/>
 		<flag value="${LIB_DIR}"/>
 		<files id="files"/>
-		
-      <lib name="../openssl/lib/${BINDIR}/libopenssl${LIBEXT}"/>
 
-      <!--
+		<!--
+		<lib name="../openssl/lib/${BINDIR}/libopenssl${LIBEXT}"/>
+		-->
 		<lib name="-lssl"/>
 		<lib name="-lcrypto"/>
+		
+      	<!--
 		<lib name="libeay32MT.lib" if="windows" />
 		<lib name="ssleay32MT.lib" if="windows" />
-      -->
+	     -->
 		<lib name="Ws2_32.lib" if="windows" />
 		<lib name="Advapi32.lib" if="windows" />
 		<lib name="Gdi32.lib" if="windows" />
 		<lib name="User32.lib" if="windows" />
-		
+
 	</target>
 
 	<target id="default">
