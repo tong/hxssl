@@ -96,7 +96,7 @@
 
 <files id="crypto" >
   <compilerflag value="-DWIN32_LEAN_AND_MEAN" if="windows" />
-  <compilerflag value="-DNO_WINDOWS_BRAINDEATH" if="windows" />
+  <compilerflag value="-DNO_WINDOWS_BRAINDEATH" unless="mac" />
   <compilerflag value="-DOPENSSL_SYSNAME_WIN32" if="windows" />
   <compilerflag value="-DOPENSSL_SYS_MSDOS" if="windows" />
   <compilerflag value="-DOPENSSL_NO_EC_NISTP_64_GCC_128" />

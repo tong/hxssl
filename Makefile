@@ -48,6 +48,8 @@ SRC_HX=sys/crypto/*.hx sys/ssl/*.hx
 
 $(NDLL): $(SRC_CPP)
 	@echo "\nBuilding ndll for $(OS) ($(MACHINE))\n"
+	@(cd openssl/tools;haxe compile.hxml)
+	@(cd openssl/project;neko build.n)
 	@(cd src;haxelib run hxcpp build.xml $(NDLL_FLAGS))
 
 ndll: $(NDLL)
