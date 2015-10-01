@@ -1,45 +1,31 @@
-language: cpp
+language: haxe
 
-os:
-  - linux
-  - osx
+sudo: false
+addons:
+  apt:
+    packages: &apt_common
+      - gcc-multilib
 
-install:
-  # For our forks that do not have mult-os enabled...
-  - if [ -z "${TRAVIS_OS_NAME}" ]; then
-    export TRAVIS_OS_NAME=linux;
-    fi
-  # Install haxe and neko dependencies
-  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
-    travis_retry sudo apt-get update -qq;
-    travis_retry sudo apt-get install zlib1g-dev libgc-dev libc6-dev-i386 -qq;
-    fi
-  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
-    travis_retry brew update;
-    travis_retry brew install caskroom/cask/brew-cask;
-    fi
-  # Install neko
-  - mkdir -p ~/neko
-  - curl -s -L --retry 3 'http://nekovm.org/_media/neko-2.0.0-linux64.tar.gz' | tar -C ~/neko -x -z --strip-components=1 -f -
-  - export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${HOME}/neko"
-  - export PATH="${PATH}:${HOME}/neko"
-  # Install haxe
-  - mkdir -p ~/haxe
-  - curl -s -L --retry 3 'http://haxe.org/website-content/downloads/3.2.0/downloads/haxe-3.2.0-linux64.tar.gz' | tar -C ~/haxe -x -z --strip-components=1 -f -
-  - export PATH="${PATH}:${HOME}/haxe"
-  - export HAXE_STD_PATH="${HOME}/haxe/std"
-  - mkdir -p ~/haxe/lib
-  - haxelib setup ~/haxe/lib
-  - echo $(haxe -version)
-  - echo $(neko -version)
-  - haxelib install hxcpp
-  - make
-  - mv ndll/Linux64/hxssl.ndll ~/neko/
+matrix:
+  include:
+    - os: linux
+    - os: osx
 
 script:
+  # Remove all ndll - we want to build them from source
+  - rm -rf ndll
+  - haxelib install hxcpp
+  - make
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
+      mv ndll/Linux64/hxssl.ndll ~/neko/;
+    elif [ "${TRAVIS_OS_NAME}" = "osx" ]; then
+      mv ndll/Mac64/hxssl.ndll ~/neko/;
+    fi
   - cd test
+  # Build neko binary and test
   - haxe build-neko.hxml
   - neko test
+  # Build cpp binary and test
   - haxe build-cpp.hxml
   - ./Run
 

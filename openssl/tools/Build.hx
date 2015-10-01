@@ -170,7 +170,7 @@ class Build extends Builder
           {name:"mdc2.h", src:"crypto/mdc2/mdc2.h"},
           {name:"modes.h", src:"crypto/modes/modes.h"},
           {name:"obj_mac.h", src:"crypto/objects/obj_mac.h"},
-          // {name:"objects.h", src:"crypto/objects/objects.h"},
+          {name:"objects.h", src:"crypto/objects/objects.h"},
           {name:"ocsp.h", src:"crypto/ocsp/ocsp.h"},
           {name:"opensslconf.h", src:"crypto/opensslconf.h"},
           {name:"opensslv.h", src:"crypto/opensslv.h"},
