@@ -169,6 +169,8 @@ class Socket {
 	**/
 	public function connect(host : Host, port : Int) : Void {
 		try {
+			if( verifyHostname == null )
+				verifyHostname = host.host;
 			socket_connect( __s, host.ip, port );
 			ctx = buildSSLContext( false );
 			ssl = SSL_new( ctx );
@@ -176,11 +178,11 @@ class Socket {
 			output.ssl = ssl;
 			var sbio = BIO_new_socket( __s, BIO_NOCLOSE() );
 			SSL_set_bio( ssl, sbio, sbio );
-			if( verifyHostname != null )
-				SSL_set_tlsext_host_name( ssl, untyped verifyHostname.__s );
+			if( validateCert )
+				SSL_set_tlsext_host_name( ssl, verifyHostname );
 			var r : Int = SSL_connect( ssl );
-			if( verifyHostname != null )
-				validate_hostname( ssl, untyped verifyHostname.__s );
+			if( validateCert )
+				validate_hostname( ssl, verifyHostname );
 		} catch( s : String ) {
 			if( s == "std@socket_connect" )
 				throw "Failed to connect on "+(try host.reverse() catch(e:Dynamic) host.toString())+":"+port;
