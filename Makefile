@@ -61,7 +61,7 @@ examples: $(SRC_HX)
 
 test-cpp: $(SRC_HX) test/*.hx*
 	@(cd test;haxe build-cpp.hxml $(HXCPP_FLAGS))
-	@(cd test;./test)
+	@(cd test;./Run)
 
 test-neko: $(SRC_HX) test/*.hx*
 	@(cd test;haxe build-neko.hxml;neko test.n)
