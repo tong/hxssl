@@ -170,7 +170,12 @@ class Socket {
 	public function connect(host : Host, port : Int) : Void {
 		try {
 			if( verifyHostname == null )
-				verifyHostname = host.host;
+				verifyHostname = 
+					#if (haxe_ver < 3.201)
+					host.host;
+					#else
+					host.toString();
+					#end
 			socket_connect( __s, host.ip, port );
 			ctx = buildSSLContext( false );
 			ssl = SSL_new( ctx );
