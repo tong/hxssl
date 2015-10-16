@@ -169,16 +169,10 @@ class Socket {
 	**/
 	public function connect(host : Host, port : Int) : Void {
 		try {
-			#if (haxe_ver < 3.202)
-			/**
-			 * TODO remove this when sys.net.Host.host is merged to master in Haxe
-			 * 
-			 * Turn off certificate validation for older Haxe because sys.net.Host.host is not available, and we can't reliably get the host name.
-			 */
-			validateCert = false;
-			#end
+			#if (haxe_ver >= 3.202)
 			if( validateCert && verifyHostname == null )
 				verifyHostname = host.host;
+			#end
 			socket_connect( __s, host.ip, port );
 			ctx = buildSSLContext( false );
 			ssl = SSL_new( ctx );
