@@ -63,7 +63,10 @@ test-cpp: $(SRC_HX) test/*.hx*
 	@(cd test;haxe build-cpp.hxml $(HXCPP_FLAGS))
 	@(cd test;./Run)
 
-test-neko: $(SRC_HX) test/*.hx*
+test/run.n: $(SRC_HX) test/*.hx*
+	@(cd test;haxe build-neko.hxml;neko run.n)
+
+test-neko: test/test.n
 	@(cd test;haxe build-neko.hxml;neko test.n)
 
 test: test-cpp test-neko
@@ -85,7 +88,8 @@ clean:
 	rm -f src/all_objs
 	rm -f src/*.o
 	rm -rf test/cpp
-	rm -f test/test*
+	rm -f test/run.n
+	rm -f test/Run
 	rm -f $(PROJECT).zip
 	cd examples && rm -rf 0*-*/cpp 0*-*/cs 0*-*/java && rm -f 0*-*/test-*
 

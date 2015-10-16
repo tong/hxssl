@@ -1,5 +1,5 @@
 -cp ..
 -D hxssl
 -main Run
--neko test.n
+-neko run.n
 -dce full
