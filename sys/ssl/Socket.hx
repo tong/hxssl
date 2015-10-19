@@ -180,10 +180,10 @@ class Socket {
 			output.ssl = ssl;
 			var sbio = BIO_new_socket( __s, BIO_NOCLOSE() );
 			SSL_set_bio( ssl, sbio, sbio );
-			if( validateCert )
+			if( validateCert && verifyHostname != null )
 				SSL_set_tlsext_host_name( ssl, verifyHostname );
 			var r : Int = SSL_connect( ssl );
-			if( validateCert )
+			if( validateCert && verifyHostname != null )
 				validate_hostname( ssl, verifyHostname );
 		} catch( s : String ) {
 			if( s == "std@socket_connect" )
