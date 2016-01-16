@@ -1,17 +1,17 @@
 language: haxe
 
-haxe: development
+haxe:
+  - development
 
 sudo: false
 addons:
   apt:
-    packages: &apt_common
+    packages:
       - gcc-multilib
 
-matrix:
-  include:
-    - os: linux
-    - os: osx
+os:
+  - linux
+  - osx
 
 script:
   # Remove all ndll - we want to build them from source
@@ -19,14 +19,14 @@ script:
   - haxelib install hxcpp
   - make
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
-      mv ndll/Linux64/hxssl.ndll ~/neko/;
+      mv ndll/Linux64/hxssl.ndll test;
     elif [ "${TRAVIS_OS_NAME}" = "osx" ]; then
-      mv ndll/Mac64/hxssl.ndll ~/neko/;
+      mv ndll/Mac64/hxssl.ndll test;
     fi
   - cd test
   # Build neko binary and test
   - haxe build-neko.hxml
-  - neko test
+  - neko run.n
   # Build cpp binary and test
   - haxe build-cpp.hxml
   - ./Run

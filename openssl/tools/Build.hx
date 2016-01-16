@@ -35,7 +35,7 @@ class Build extends Builder
          return;
       }
       
-      buildSsl("1.0.2a");
+      buildSsl("1.0.2e");
    }
 
    override public function cleanAll(inBuildFlags:Array<String>) : Bool

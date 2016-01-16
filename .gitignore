@@ -9,3 +9,7 @@ _*
 *.csr
 *.key
 */all_objs
+openssl/lib
+openssl/project/include
+openssl/project/unpack
+src/obj
