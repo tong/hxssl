@@ -1,10 +1,13 @@
 {
 	"name" : "hxssl",
-	"url" : "https://github.com/tong/hxssl",
-	"license" : "Public",
-	"tags" : ["ssl","openssl","secure","encryption","crypto","https","tls","socket","hash","base64","md5"],
 	"description" : "Cpp/Neko OpenSSL Bindings",
 	"version" : "3.0.0-alpha",
 	"releasenote": "Initial haxe3 release",
-	"contributors": ["tong","Blank101"]
+	"url" : "https://github.com/tong/hxssl",
+	"license" : "Public",
+	"tags" : ["ssl","openssl","secure","encryption","crypto","https","tls","socket","hash","base64","md5"],
+	"contributors": ["tong","Blank101"],
+	"dependencies": {
+		"hxcpp": ""
+	}
 }
