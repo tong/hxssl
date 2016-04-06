@@ -26,10 +26,10 @@ script:
   - cd test
   # Build neko binary and test
   - haxe build-neko.hxml
-  - neko run.n
+  - neko unit.n
   # Build cpp binary and test
   - haxe build-cpp.hxml
-  - ./Run
+  - ./unit
 
 notifications:
   email: false
