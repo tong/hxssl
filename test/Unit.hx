@@ -1,5 +1,5 @@
 
-class Run {
+class Unit {
 
 	static function main() {
 
@@ -13,11 +13,10 @@ class Run {
 		r.add( new TestHttp() );
 		r.add( new TestSocket() );
 
-		if (r.run()) {
+		if( r.run() ) {
 			Sys.exit(0);
 		} else {
 			Sys.exit(1);
 		}
 	}
-
 }

@@ -1,5 +1,3 @@
--cp ..
--D hxssl
--main Run
--neko run.n
--dce full
+-neko unit.n
+-main Unit
+-lib hxssl

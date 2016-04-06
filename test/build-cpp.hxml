@@ -1,6 +1,4 @@
--cp ..
--D hxssl
--main Run
 -cpp cpp
--dce full
--cmd cp cpp/Run .
+-main Unit
+-lib hxssl
+-cmd cp cpp/Unit ./unit
