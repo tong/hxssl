@@ -1,6 +1,7 @@
 language: haxe
 
 haxe:
+  - "3.2.1"
   - development
 
 sudo: false
@@ -17,7 +18,9 @@ script:
   # Remove all ndll - we want to build them from source
   - rm -rf ndll
   - haxelib install hxcpp
+  - wget -P openssl/project/tars/ ftp://ftp.openssl.org/source/openssl-1.0.2g.tar.gz
   - make all
+  - make install
   - haxe --cwd test/ build-neko.hxml
   - neko test/unit.n
   - haxe --cwd test/ build-cpp.hxml
