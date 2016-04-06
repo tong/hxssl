@@ -7,6 +7,10 @@ Haxe Cpp/Neko [OpenSSL](https://www.openssl.org/) bindings.
 ### Build
 
 ```sh
+
+## Download openssl (you might want to use another version)
+wget -P openssl/project/tars/ ftp://ftp.openssl.org/source/openssl-1.0.2g.tar.gz
+
 ## Build the build.n script:
 cd openssl/tools; haxe compile.hxml
 
