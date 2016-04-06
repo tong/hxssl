@@ -1,50 +1,85 @@
 
-import sys.crypto.SHA256;
+import haxe.Http;
 
 class TestHttp extends haxe.unit.TestCase {
-	
-	function assertError (f:Void->Void) {
-		var err:Bool;
+
+	static inline function req( urls : Array<String> ) {
+		for( url in urls ) Http.requestUrl( url );
+	}
+
+	public function test_http() {
+		req( ["http://www.w3.org/"] );
+		assertTrue( true );
+	}
+
+	public function test_https_valid_cert() {
+		var err = false;
 		try {
-			f();
-			err = false;
-		} catch (e:Dynamic) {
+			req([
+				"https://www.google.com/",
+				"https://www.nsa.gov/"
+			]);
+		} catch(e:Dynamic) {
+			trace(e);
+			err = true;
+		}
+		assertFalse( err );
+	}
+
+
+	public function test_https_invalid_cert() {
+
+		//sys.ssl.Socket.defaultVerifyCertFile = true;
+		var err = false;
+		try {
+			req([
+				"https://tv.eurosport.com/"
+			]);
+		} catch(e:Dynamic) {
+			trace(e);
+			err = true;
+		}
+		assertTrue( err );
+
+		/*
+		//sys.ssl.Socket.defaultVerifyCertFile = false;
+		var err = false;
+		try {
+			req([
+				"https://tv.eurosport.com/"
+			]);
+		} catch(e:Dynamic) {
+			trace(e);
+			err = true;
+		}
+		assertFalse( err );
+		*/
+	}
+
+	public function test_https_expired_cert() {
+		var err = false;
+		try {
+			req([
+				"https://testssl-expire.disig.sk/index.en.html"
+			]);
+		} catch(e:Dynamic) {
+			trace(e);
 			err = true;
 		}
 		assertTrue( err );
 	}
 
-	public function test_http() {
-		// Test regular http
-		haxe.Http.requestUrl("http://www.w3.org/");
-		assertTrue( true );
-	}
-	
-	public function test_https_valid_cert() {
-		// Test a valid https certificate
-		haxe.Http.requestUrl("https://www.google.com/");
-		assertTrue( true );
-	}
-	
-	public function test_https_invalid_cert() {
-		// Test a non-matching domain name
-		assertError(function () {
-			haxe.Http.requestUrl("https://tv.eurosport.com/");
-		});
-	}
-	
-	public function test_https_expired_cert() {
-		// Test an expired certificate
-		assertError(function () {
-			haxe.Http.requestUrl("https://testssl-expire.disig.sk/index.en.html");
-		});
-	}
-	
 	public function test_https_self_signed_cert() {
-		// Test a self signed certificate
-		assertError(function () {
-			haxe.Http.requestUrl("https://www.pcwebshop.co.uk/");
-		});
+		var err = false;
+		try {
+			req([
+				"https://www.pcwebshop.co.uk/"
+			]);
+		} catch(e:Dynamic) {
+			trace(e);
+			err = true;
+		}
+		assertFalse( err ); //TODO should pass ?
 	}
-	
+
 }
