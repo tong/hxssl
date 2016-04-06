@@ -20,7 +20,7 @@ class Build extends Builder
       var tizen = target=="tizen";
       var emscripten = target=="emscripten";
       var webos = target=="webos";
-      
+
       buildArgs = inBuildFlags;
 
       if (verbose)
@@ -34,8 +34,8 @@ class Build extends Builder
       {
          return;
       }
-      
-      buildSsl("1.0.2e");
+
+      buildSsl("1.0.2g");
    }
 
    override public function cleanAll(inBuildFlags:Array<String>) : Bool
