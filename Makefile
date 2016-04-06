@@ -46,11 +46,15 @@ NDLL=ndll/$(OS)/$(PROJECT).ndll
 SRC_CPP=src/*.cpp
 SRC_HX=sys/crypto/*.hx sys/ssl/*.hx
 
+all: build
+
+build: $(NDLL)
+
 $(NDLL): $(SRC_CPP)
-	@echo "\nBuilding ndll for $(OS) ($(MACHINE))\n"
+	@echo "Building $(NDLL)\n"
 	@(cd openssl/tools;haxe compile.hxml)
 	@(cd openssl/project;neko build.n)
-	@(cd src;haxelib run hxcpp build.xml $(NDLL_FLAGS))
+	@(cd src;haxelib run hxcpp build.xml)
 
 ndll: $(NDLL)
 
@@ -59,25 +63,23 @@ examples: $(SRC_HX)
 	#@(cd examples/02-*/;haxe build.hxml $(HXCPP_FLAGS))
 	@(cd examples/03-*/;haxe build.hxml $(HXCPP_FLAGS))
 
-test-cpp: $(SRC_HX) test/*.hx*
-	@(cd test;haxe build-cpp.hxml $(HXCPP_FLAGS))
-	@(cd test;./Run)
+test/unit: $(SRC_HX) test/*.hx*
+	haxe --cwd test build-cpp.hxml $(HXCPP_FLAGS)
 
-test/run.n: $(SRC_HX) test/*.hx*
-	@(cd test;haxe build-neko.hxml;neko run.n)
+test/unit.n: $(SRC_HX) test/*.hx*
+	haxe --cwd test build-neko.hxml
 
-test-neko: test/test.n
-	@(cd test;haxe build-neko.hxml;neko test.n)
+test: test/unit.n test/unit
+	neko test/unit.n
+	./test/unit
 
-test: test-cpp test-neko
-
-hxssl.zip: clean ndll
+$(PROJECT).zip: clean ndll
 	zip -r $@ ndll/ src/build.xml src/*.cpp examples/ haxe/ sys/ test/ Makefile haxelib.json README.md -x "*.o"
 
-haxelib: hxssl.zip
+haxelib: $(PROJECT).zip
 
 install: haxelib
-	haxelib local hxssl.zip
+	haxelib local $(PROJECT).zip
 
 uninstall:
 	haxelib remove hxssl
@@ -85,12 +87,10 @@ uninstall:
 clean:
 	rm -f $(NDLL)
 	rm -rf src/obj
-	rm -f src/all_objs
-	rm -f src/*.o
+	rm -f src/all_objs src/*.o
 	rm -rf test/cpp
-	rm -f test/run.n
-	rm -f test/Run
+	rm -f test/unit*
 	rm -f $(PROJECT).zip
 	cd examples && rm -rf 0*-*/cpp 0*-*/cs 0*-*/java && rm -f 0*-*/test-*
 
-.PHONY: ndll examples test test-cpp test-neko haxelib install uninstall clean
+.PHONY: all build ndll examples test haxelib install uninstall clean
