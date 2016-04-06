@@ -1,6 +1,7 @@
 language: haxe
 
 haxe:
+  - "3.2.1"
   - development
 
 sudo: false
@@ -18,6 +19,7 @@ script:
   - rm -rf ndll
   - haxelib install hxcpp
   - make all
+  - make install
   - haxe --cwd test/ build-neko.hxml
   - neko test/unit.n
   - haxe --cwd test/ build-cpp.hxml
