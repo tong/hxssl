@@ -17,19 +17,11 @@ script:
   # Remove all ndll - we want to build them from source
   - rm -rf ndll
   - haxelib install hxcpp
-  - make
-  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
-      mv ndll/Linux64/hxssl.ndll test;
-    elif [ "${TRAVIS_OS_NAME}" = "osx" ]; then
-      mv ndll/Mac64/hxssl.ndll test;
-    fi
-  - cd test
-  # Build neko binary and test
-  - haxe build-neko.hxml
-  - neko unit.n
-  # Build cpp binary and test
-  - haxe build-cpp.hxml
-  - ./unit
+  - make all
+  - haxe --cwd test/ build-neko.hxml
+  - neko test/unit.n
+  - haxe --cwd test/ build-cpp.hxml
+  - ./test/unit
 
 notifications:
   email: false
