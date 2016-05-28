@@ -3,6 +3,7 @@
 
 Haxe Cpp/Neko [OpenSSL](https://www.openssl.org/) bindings.
 
+#### Please note hxssl is depreciated as it has been merged into Haxe core. This library is no longer maintained.
 
 ### Build
 
